@@ -30,10 +30,11 @@ public class ArticleController {
     @GetMapping 
     public Result<?> list(
         @RequestParam(defaultValue = "1") long page, 
-        @RequestParam(defaultValue = "10") long size
+        @RequestParam(defaultValue = "10") long size,
+        @RequestParam(required = false) String keyword
     ) {
         return Result.success(
-                articleService.page(page, size)
+                articleService.page(page, size, keyword)
         );
     }
 

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import com.mywiki.backend.common.ErrorCode;
 import com.mywiki.backend.exception.BusinessException;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+
 
 import java.util.List;
 
@@ -32,9 +34,19 @@ public class ArticleService {
     //     return articleMapper.selectList(null);
     // }
 
-    public Page<Article> page(long current, long size) {
+    public Page<Article> page(long current, long size, String keyword) {
         Page<Article> page = new Page<>(current, size);
-        return articleMapper.selectPage(page, null);
+        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            wrapper.like(
+                Article::getTitle,
+                keyword.trim()
+            );
+        }
+        wrapper.orderByDesc(
+            Article::getCreateTime
+        );
+        return articleMapper.selectPage(page, wrapper);
     }
 
     // 新增文章
