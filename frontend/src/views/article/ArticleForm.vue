@@ -3,6 +3,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { articleApi, type ArticlePayload } from '../../api'
+import { articlePager } from './pager'
 
 const route = useRoute()
 const router = useRouter()
@@ -25,14 +26,7 @@ const fetchDetail = async () => {
   form.content = data.content
 }
 
-const backToList = (backFirstPage = false) =>
-  router.push({
-    path: '/articles',
-    query: {
-      ...(backFirstPage ? {} : route.query.page ? { page: route.query.page } : {}),
-      ...(route.query.size ? { size: route.query.size } : {}),
-    },
-  })
+const backToList = () => router.push('/articles')
 
 const onSubmit = async () => {
   if (!formRef.value) return
@@ -47,7 +41,8 @@ const onSubmit = async () => {
     } else {
       await articleApi.create(payload)
       ElMessage.success('新增成功')
-      backToList(true)
+      articlePager.page = 1
+      backToList()
     }
   } finally {
     loading.value = false

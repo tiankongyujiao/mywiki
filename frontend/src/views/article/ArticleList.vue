@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, View, Edit, Delete } from '@element-plus/icons-vue'
 import { articleApi, type Article } from '../../api'
+import { articlePager } from './pager'
 
-const route = useRoute()
 const router = useRouter()
 const loading = ref(false)
 const records = ref<Article[]>([])
 const total = ref(0)
 const keyword = ref('')
-const currentPage = ref(Number(route.query.page) || 1)
-const pageSize = ref(Number(route.query.size) || 10)
+const currentPage = ref(articlePager.page)
+const pageSize = ref(articlePager.size)
 
 const fetchList = async () => {
   loading.value = true
@@ -41,7 +41,9 @@ const handleSearch = () => {
   }
 }
 
-watch([currentPage, pageSize], () => {
+watch([currentPage, pageSize], ([page, size]) => {
+  articlePager.page = page
+  articlePager.size = size
   fetchList()
 })
 
@@ -54,18 +56,9 @@ const handleDelete = async (row: Article) => {
   fetchList()
 }
 
-const handleAdd = () =>
-  router.push({ path: '/articles/create', query: { size: String(pageSize.value) } })
-const handleEdit = (row: Article) =>
-  router.push({
-    path: `/articles/${row.id}/edit`,
-    query: { page: String(currentPage.value), size: String(pageSize.value) },
-  })
-const handleView = (row: Article) =>
-  router.push({
-    path: `/articles/${row.id}`,
-    query: { page: String(currentPage.value), size: String(pageSize.value) },
-  })
+const handleAdd = () => router.push('/articles/create')
+const handleEdit = (row: Article) => router.push(`/articles/${row.id}/edit`)
+const handleView = (row: Article) => router.push(`/articles/${row.id}`)
 
 const formatTime = (t: unknown): string => {
   if (!t) return '-'

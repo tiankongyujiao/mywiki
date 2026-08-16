@@ -8,10 +8,9 @@ const router = useRouter()
 const loading = ref(false)
 const article = ref<Article>()
 
-const backToList = () => router.push({ path: '/articles', query: route.query })
+const backToList = () => router.push('/articles')
 
-const goEdit = () =>
-  router.push({ path: `/articles/${article.value?.id}/edit`, query: route.query })
+const goEdit = () => router.push(`/articles/${article.value?.id}/edit`)
 
 const fetchDetail = async () => {
   loading.value = true
