@@ -6,6 +6,7 @@ import com.mywiki.backend.mapper.ArticleMapper;
 import org.springframework.stereotype.Service;
 import com.mywiki.backend.common.ErrorCode;
 import com.mywiki.backend.exception.BusinessException;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.List;
 
@@ -27,8 +28,13 @@ public class ArticleService {
     }
 
     // 查询列表
-    public List<Article> list(){
-        return articleMapper.selectList(null);
+    // public List<Article> list(){
+    //     return articleMapper.selectList(null);
+    // }
+
+    public Page<Article> page(long current, long size) {
+        Page<Article> page = new Page<>(current, size);
+        return articleMapper.selectPage(page, null);
     }
 
     // 新增文章

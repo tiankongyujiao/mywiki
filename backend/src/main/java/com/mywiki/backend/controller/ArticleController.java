@@ -23,9 +23,18 @@ public class ArticleController {
     }
 
     // 查询列表
-    @GetMapping
-    public Result<List<Article>> list(){
-        return Result.success(articleService.list());
+    // @GetMapping
+    // public Result<List<Article>> list(){
+    //     return Result.success(articleService.list());
+    // }
+    @GetMapping 
+    public Result<?> list(
+        @RequestParam(defaultValue = "1") long page, 
+        @RequestParam(defaultValue = "10") long size
+    ) {
+        return Result.success(
+                articleService.page(page, size)
+        );
     }
 
     // 查询详情

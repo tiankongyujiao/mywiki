@@ -13,8 +13,23 @@ export interface ArticlePayload {
   content: string
 }
 
+export interface ArticlePageQuery {
+  page: number
+  size: number
+  keyword?: string
+}
+
+export interface ArticlePage {
+  records: Article[]
+  total: string | number
+  size: string | number
+  current: string | number
+  page: string | number
+}
+
 export const articleApi = {
-  list: () => request.get<unknown, Article[]>('/articles'),
+  list: (params: ArticlePageQuery) =>
+    request.get<unknown, ArticlePage>('/articles', { params }),
   getById: (id: number | string) =>
     request.get<unknown, Article>(`/articles/${id}`),
   create: (data: ArticlePayload) =>

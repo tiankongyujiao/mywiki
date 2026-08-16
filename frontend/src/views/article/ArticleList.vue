@@ -1,38 +1,49 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, watch, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, View, Edit, Delete } from '@element-plus/icons-vue'
 import { articleApi, type Article } from '../../api'
 
+const route = useRoute()
 const router = useRouter()
 const loading = ref(false)
-const list = ref<Article[]>([])
+const records = ref<Article[]>([])
+const total = ref(0)
 const keyword = ref('')
-const currentPage = ref(1)
-const pageSize = ref(10)
-
-const filtered = computed(() => {
-  const kw = keyword.value.trim().toLowerCase()
-  if (!kw) return list.value
-  return list.value.filter((a) => a.title?.toLowerCase().includes(kw))
-})
-const total = computed(() => filtered.value.length)
-const paged = computed(() =>
-  filtered.value.slice(
-    (currentPage.value - 1) * pageSize.value,
-    currentPage.value * pageSize.value,
-  ),
-)
+const currentPage = ref(Number(route.query.page) || 1)
+const pageSize = ref(Number(route.query.size) || 10)
 
 const fetchList = async () => {
   loading.value = true
   try {
-    list.value = await articleApi.list()
+    const data = await articleApi.list({
+      page: currentPage.value,
+      size: pageSize.value,
+      keyword: keyword.value.trim() || undefined,
+    })
+    records.value = data.records
+    total.value = Number(data.total) || 0
+    // 当前页被删空时回退一页（watch 会触发重新请求）
+    if (!records.value.length && currentPage.value > 1) {
+      currentPage.value -= 1
+    }
   } finally {
     loading.value = false
   }
 }
+
+const handleSearch = () => {
+  if (currentPage.value === 1) {
+    fetchList()
+  } else {
+    currentPage.value = 1
+  }
+}
+
+watch([currentPage, pageSize], () => {
+  fetchList()
+})
 
 const handleDelete = async (row: Article) => {
   await ElMessageBox.confirm(`确定删除文章「${row.title}」吗？`, '提示', {
@@ -43,9 +54,18 @@ const handleDelete = async (row: Article) => {
   fetchList()
 }
 
-const handleAdd = () => router.push('/articles/create')
-const handleEdit = (row: Article) => router.push(`/articles/${row.id}/edit`)
-const handleView = (row: Article) => router.push(`/articles/${row.id}`)
+const handleAdd = () =>
+  router.push({ path: '/articles/create', query: { size: String(pageSize.value) } })
+const handleEdit = (row: Article) =>
+  router.push({
+    path: `/articles/${row.id}/edit`,
+    query: { page: String(currentPage.value), size: String(pageSize.value) },
+  })
+const handleView = (row: Article) =>
+  router.push({
+    path: `/articles/${row.id}`,
+    query: { page: String(currentPage.value), size: String(pageSize.value) },
+  })
 
 const formatTime = (t: unknown): string => {
   if (!t) return '-'
@@ -70,11 +90,13 @@ onMounted(fetchList)
         clearable
         :prefix-icon="Search"
         style="width: 240px"
+        @keyup.enter="handleSearch"
+        @clear="handleSearch"
       />
       <el-button type="primary" :icon="Plus" @click="handleAdd">新增文章</el-button>
     </div>
 
-    <el-table :data="paged" v-loading="loading" border stripe style="width: 100%">
+    <el-table :data="records" v-loading="loading" border stripe style="width: 100%">
       <el-table-column prop="id" label="ID" width="180" show-overflow-tooltip />
       <el-table-column prop="title" label="标题" min-width="180" show-overflow-tooltip />
       <el-table-column prop="content" label="内容" min-width="260" show-overflow-tooltip />

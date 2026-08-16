@@ -25,6 +25,15 @@ const fetchDetail = async () => {
   form.content = data.content
 }
 
+const backToList = (backFirstPage = false) =>
+  router.push({
+    path: '/articles',
+    query: {
+      ...(backFirstPage ? {} : route.query.page ? { page: route.query.page } : {}),
+      ...(route.query.size ? { size: route.query.size } : {}),
+    },
+  })
+
 const onSubmit = async () => {
   if (!formRef.value) return
   await formRef.value.validate()
@@ -34,11 +43,12 @@ const onSubmit = async () => {
     if (isEdit.value) {
       await articleApi.update(route.params.id as string, payload)
       ElMessage.success('修改成功')
+      backToList()
     } else {
       await articleApi.create(payload)
       ElMessage.success('新增成功')
+      backToList(true)
     }
-    router.push('/articles')
   } finally {
     loading.value = false
   }
@@ -77,7 +87,7 @@ onMounted(() => {
       </el-form-item>
       <el-form-item>
         <el-button type="primary" :loading="loading" @click="onSubmit">保存</el-button>
-        <el-button @click="router.push('/articles')">取消</el-button>
+        <el-button @click="backToList">取消</el-button>
       </el-form-item>
     </el-form>
   </el-card>

@@ -8,6 +8,11 @@ const router = useRouter()
 const loading = ref(false)
 const article = ref<Article>()
 
+const backToList = () => router.push({ path: '/articles', query: route.query })
+
+const goEdit = () =>
+  router.push({ path: `/articles/${article.value?.id}/edit`, query: route.query })
+
 const fetchDetail = async () => {
   loading.value = true
   try {
@@ -37,13 +42,8 @@ onMounted(fetchDetail)
       <div class="header">
         <span class="title">{{ article?.title }}</span>
         <div>
-          <el-button
-            type="primary"
-            @click="router.push(`/articles/${article?.id}/edit`)"
-          >
-            编辑
-          </el-button>
-          <el-button @click="router.push('/articles')">返回列表</el-button>
+          <el-button type="primary" @click="goEdit"> 编辑 </el-button>
+          <el-button @click="backToList">返回列表</el-button>
         </div>
       </div>
     </template>
