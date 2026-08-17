@@ -41,7 +41,9 @@ public class ArticleService {
             wrapper.like(
                 Article::getTitle,
                 keyword.trim()
-            );
+            )
+            .or()
+            .like(Article::getContent, keyword.trim());
         }
         wrapper.orderByDesc(
             Article::getCreateTime
