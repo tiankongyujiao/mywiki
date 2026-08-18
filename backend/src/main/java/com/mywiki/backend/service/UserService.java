@@ -8,6 +8,7 @@ import com.mywiki.backend.exception.BusinessException;
 import com.mywiki.backend.mapper.UserMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DuplicateKeyException;
 
 @Service
 public class UserService {
@@ -49,6 +50,10 @@ public class UserService {
                 passwordEncoder.encode(dto.getPassword())
         );
 
-        userMapper.insert(user);
+        try {
+            userMapper.insert(user);
+        } catch (DuplicateKeyException e) {
+            throw new BusinessException(ErrorCode.USERNAME_EXIST);
+        }
     }
 }
