@@ -52,24 +52,40 @@ public class ArticleService {
     }
 
     // 新增文章
-    public void create(ArticleCreateDTO dto){
+    public void create(ArticleCreateDTO dto, Long userId){
         Article article = new Article();
         article.setTitle(dto.getTitle());
         article.setContent(dto.getContent());
+        article.setUserId(userId);
         articleMapper.insert(article);
     }
 
     // 修改文章
-    public void update(Long id, ArticleCreateDTO dto){
-        Article article = new Article();
-        article.setId(id);
+    public void update(Long id, ArticleCreateDTO dto, Long userId){
+        Article article = articleMapper.selectById(id);
+        if (article == null) {
+            throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
+        }
+        if (!article.getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.NO_PERMISSION);
+        }
         article.setTitle(dto.getTitle());
         article.setContent(dto.getContent());
         articleMapper.updateById(article);
     }
 
     // 删除文章
-    public void delete(Long id){
+    public void delete(Long id, Long userId){
+        Article article = articleMapper.selectById(id);
+
+        if (article == null) {
+            throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
+        }
+
+        if (!article.getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.NO_PERMISSION);
+        }
+
         articleMapper.deleteById(id);
     }
 }

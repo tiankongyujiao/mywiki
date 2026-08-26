@@ -11,3 +11,7 @@ spring:
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+jwt:
+  secret: "mywiki-local-secret-key-change-this-in-production"
+  expiration: 86400000

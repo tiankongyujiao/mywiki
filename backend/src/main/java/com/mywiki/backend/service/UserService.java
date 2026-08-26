@@ -9,6 +9,9 @@ import com.mywiki.backend.mapper.UserMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.dao.DuplicateKeyException;
+import com.mywiki.backend.dto.UserLoginDTO;
+import com.mywiki.backend.dto.UserLoginResponse;
+import com.mywiki.backend.util.JwtUtil;
 
 @Service
 public class UserService {
@@ -17,12 +20,16 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final JwtUtil jwtUtil;
+
     public UserService(
             UserMapper userMapper,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            JwtUtil jwtUtil
     ) {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     public void register(UserRegisterDTO dto) {
@@ -55,5 +62,50 @@ public class UserService {
         } catch (DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.USERNAME_EXIST);
         }
+    }
+
+
+    public UserLoginResponse login(UserLoginDTO dto) {
+
+        LambdaQueryWrapper<User> wrapper =
+                new LambdaQueryWrapper<>();
+
+        wrapper.eq(
+                User::getUsername,
+                dto.getUsername()
+        );
+
+        User user = userMapper.selectOne(wrapper);
+
+        if (user == null) {
+            throw new BusinessException(ErrorCode.LOGIN_FAILED);
+        }
+
+        boolean matches =
+                passwordEncoder.matches(
+                        dto.getPassword(),
+                        user.getPassword()
+                );
+
+        if (!matches) {
+            throw new BusinessException(ErrorCode.LOGIN_FAILED);
+        }
+
+        UserLoginResponse response =
+                new UserLoginResponse();
+
+        response.setId(user.getId());
+
+        response.setUsername(user.getUsername());
+
+        String token =
+                jwtUtil.generateToken(
+                        user.getId(),
+                        user.getUsername()
+                );
+
+        response.setToken(token);
+
+        return response;
     }
 }

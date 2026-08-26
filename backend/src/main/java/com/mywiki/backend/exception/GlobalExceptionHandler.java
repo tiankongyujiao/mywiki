@@ -1,16 +1,27 @@
 package com.mywiki.backend.exception;
 
+import com.mywiki.backend.common.ErrorCode;
 import com.mywiki.backend.common.Result;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
-    public Result<?> handleBusiness(BusinessException e){
+    public Result<?> handleBusiness(BusinessException e, HttpServletResponse response){
+        ErrorCode errorCode = e.getErrorCode();
+        if (errorCode != null) {
+            response.setStatus(errorCode.getHttpStatus());
+            return Result.error(
+                    errorCode.getCode(),
+                    errorCode.getMessage()
+            );
+        }
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return Result.error(
-                e.getErrorCode().getCode(),
-                e.getErrorCode().getMessage()
+                400,
+                e.getMessage()
         );
     }
 

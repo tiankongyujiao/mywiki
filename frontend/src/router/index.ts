@@ -5,6 +5,18 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      path: '/login',
+      name: 'Login',
+      component: () => import('../views/users/Login.vue'),
+      meta: { title: '登录' },
+    },
+    {
+      path: '/register',
+      name: 'Register',
+      component: () => import('../views/users/Register.vue'),
+      meta: { title: '注册' },
+    },
+    {
       path: '/',
       component: MainLayout,
       redirect: '/articles',

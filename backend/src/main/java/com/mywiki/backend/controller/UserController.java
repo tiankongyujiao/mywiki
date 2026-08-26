@@ -6,6 +6,8 @@ import com.mywiki.backend.common.Result;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import com.mywiki.backend.dto.UserLoginDTO;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -24,5 +26,15 @@ public class UserController {
         userService.register(dto);
 
         return Result.success(null);
+    }
+
+    @PostMapping("/login")
+    public Result<?> login(
+            @Valid @RequestBody UserLoginDTO dto
+    ) {
+
+        return Result.success(
+                userService.login(dto)
+        );
     }
 }
