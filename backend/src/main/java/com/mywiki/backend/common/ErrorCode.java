@@ -7,7 +7,8 @@ public enum ErrorCode {
     USERNAME_EXIST(10003, "用户名已存在", 400),
     LOGIN_FAILED(10004, "用户名或密码错误", 401),
     SYSTEM_ERROR(50000, "系统异常", 500),
-    NO_PERMISSION(10005, "无权操作该文章", 403);
+    NO_PERMISSION(10005, "无权操作该文章", 403),
+    USER_NOT_FOUND(10006, "用户不存在", 404);
 
     private final Integer code;
     private final String message;

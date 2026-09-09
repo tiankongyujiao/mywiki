@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import com.mywiki.backend.dto.UserLoginDTO;
+import com.mywiki.backend.vo.UserVO;
+import com.mywiki.backend.annotation.CurrentUser;
 
 @RestController
 @RequestMapping("/users")
@@ -35,6 +37,15 @@ public class UserController {
 
         return Result.success(
                 userService.login(dto)
+        );
+    }
+
+    @GetMapping("/me")
+    public Result<UserVO> me(
+            @CurrentUser Long userId
+    ) {
+        return Result.success(
+                userService.getCurrentUser(userId)
         );
     }
 }

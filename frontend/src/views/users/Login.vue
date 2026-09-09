@@ -3,7 +3,9 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { userApi, type UserLoginPayload } from '../../api'
+import { useAuthStore } from '@/stores/auth'
 
+const authStore = useAuthStore()
 const router = useRouter()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
@@ -20,7 +22,7 @@ const onSubmit = async () => {
   try {
     const res = await userApi.login({ username: form.username, password: form.password })
     // console.log(res.token)
-    localStorage.setItem('token', res.token)
+    authStore.setLogin({ token: res.token })
     ElMessage.success('登录成功')
     router.push('/articles')
   } finally {

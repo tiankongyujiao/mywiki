@@ -12,6 +12,7 @@ import org.springframework.dao.DuplicateKeyException;
 import com.mywiki.backend.dto.UserLoginDTO;
 import com.mywiki.backend.dto.UserLoginResponse;
 import com.mywiki.backend.util.JwtUtil;
+import com.mywiki.backend.vo.UserVO;
 
 @Service
 public class UserService {
@@ -107,5 +108,17 @@ public class UserService {
         response.setToken(token);
 
         return response;
+    }
+
+    public UserVO getCurrentUser(Long userId) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+                throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+        UserVO vo = new UserVO();
+
+        vo.setId(user.getId());
+        vo.setUsername(user.getUsername());
+        return vo;
     }
 }

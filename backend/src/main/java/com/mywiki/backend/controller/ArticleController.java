@@ -8,6 +8,7 @@ import com.mywiki.backend.common.Result;
 
 import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletRequest;
+import com.mywiki.backend.annotation.CurrentUser;
 
 
 
@@ -48,24 +49,21 @@ public class ArticleController {
 
     // 创建
     @PostMapping
-    public Result<Void> create(@Valid @RequestBody ArticleCreateDTO dto, HttpServletRequest request){
-        Long userId = (Long) request.getAttribute("userId");
+    public Result<Void> create(@Valid @RequestBody ArticleCreateDTO dto, HttpServletRequest request, @CurrentUser Long userId){
         articleService.create(dto, userId);
         return Result.success(null);
     }
 
     // 修改
     @PutMapping("/{id}")
-    public Result<Void> update(@PathVariable Long id , @Valid @RequestBody ArticleCreateDTO dto, HttpServletRequest request){
-        Long userId = (Long) request.getAttribute("userId");
+    public Result<Void> update(@PathVariable Long id , @Valid @RequestBody ArticleCreateDTO dto, HttpServletRequest request, @CurrentUser Long userId){
         articleService.update(id, dto, userId);
         return Result.success(null);
     }
 
     // 删除
     @DeleteMapping("/{id}")
-    public Result<Void> delete(@PathVariable Long id, HttpServletRequest request){
-        Long userId = (Long) request.getAttribute("userId");
+    public Result<Void> delete(@PathVariable Long id, HttpServletRequest request, @CurrentUser Long userId){
         articleService.delete(id, userId);
         return Result.success(null);
     }

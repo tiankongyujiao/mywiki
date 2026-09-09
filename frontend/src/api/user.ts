@@ -16,9 +16,15 @@ export interface UserLoginResponse {
   token: string,
 }
 
+export interface UserVO {
+  id: number
+  username: string
+}
+
 export const userApi = {
   register: (data: UserRegisterPayload) =>
     request.post<unknown, void>('/users/register', data),
   login: (data: UserLoginPayload) =>
     request.post<unknown, UserLoginResponse>('/users/login', data),
+  getCurrentUser: () => request.get<unknown, UserVO>('/users/me'),
 }
