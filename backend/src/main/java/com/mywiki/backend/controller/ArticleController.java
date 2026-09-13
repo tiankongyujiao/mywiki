@@ -29,21 +29,28 @@ public class ArticleController {
     // public Result<List<Article>> list(){
     //     return Result.success(articleService.list());
     // }
-    @GetMapping 
+    @GetMapping
     public Result<?> list(
-        @RequestParam(defaultValue = "1") long page, 
+        @RequestParam(defaultValue = "1") long page,
         @RequestParam(defaultValue = "10") long size,
-        @RequestParam(required = false) String keyword
+        @RequestParam(required = false) String keyword,
+        HttpServletRequest request
     ) {
         return Result.success(
-                articleService.page(page, size, keyword)
+                articleService.page(page, size, keyword, currentUserId(request))
         );
     }
 
-    // 查询详情
+    // 查询详情（游客也可访问，currentUserId 为 null 时 VO 里权限字段为 false）
     @GetMapping("/{id}")
-    public Result<ArticleVO> get(@PathVariable Long id){
-        return Result.success(articleService.getById(id));
+    public Result<ArticleVO> get(@PathVariable Long id, HttpServletRequest request){
+        return Result.success(articleService.getById(id, currentUserId(request)));
+    }
+
+    // JwtInterceptor 对 GET /articles 放行时可能未解析 token，未登录返回 null
+    private Long currentUserId(HttpServletRequest request) {
+        Object userId = request.getAttribute("userId");
+        return userId instanceof Long id ? id : null;
     }
 
     // 创建

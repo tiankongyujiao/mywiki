@@ -26,21 +26,15 @@ public class ArticleService {
         this.userMapper = userMapper;
     }
 
-    // 查询详情
-    public ArticleVO getById(Long id){
+    // 查询详情（游客可访问，currentUserId 可能为 null）
+    public ArticleVO getById(Long id, Long currentUserId){
         Article article = articleMapper.selectById(id);
         if(article == null){
             throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
         }
         User author = userMapper.selectById(article.getUserId());
-        ArticleVO vo = new ArticleVO();
-        vo.setId(article.getId());
-        vo.setTitle(article.getTitle());
-        vo.setContent(article.getContent());
-        vo.setUserId(article.getUserId());
+        ArticleVO vo = toVO(article, currentUserId);
         vo.setUsername(author == null ? null : author.getUsername());
-        vo.setCreatedAt(article.getCreateTime());
-        vo.setUpdatedAt(article.getUpdateTime());
         return vo;
     }
 
@@ -49,7 +43,7 @@ public class ArticleService {
     //     return articleMapper.selectList(null);
     // }
 
-    public Page<Article> page(long current, long size, String keyword) {
+    public Page<ArticleVO> page(long current, long size, String keyword, Long currentUserId) {
         Page<Article> page = new Page<>(current, size);
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -63,7 +57,30 @@ public class ArticleService {
         wrapper.orderByDesc(
             Article::getCreateTime
         );
-        return articleMapper.selectPage(page, wrapper);
+        articleMapper.selectPage(page, wrapper);
+
+        Page<ArticleVO> voPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
+        voPage.setRecords(
+            page.getRecords().stream()
+                .map(a -> toVO(a, currentUserId))
+                .toList()
+        );
+        return voPage;
+    }
+
+    // 组装 VO：isOwner 即"当前登录用户是作者"，未登录时恒为 false
+    private ArticleVO toVO(Article article, Long currentUserId) {
+        boolean isOwner = currentUserId != null && currentUserId.equals(article.getUserId());
+        ArticleVO vo = new ArticleVO();
+        vo.setId(article.getId());
+        vo.setTitle(article.getTitle());
+        vo.setContent(article.getContent());
+        vo.setUserId(article.getUserId());
+        vo.setCreatedAt(article.getCreateTime());
+        vo.setUpdatedAt(article.getUpdateTime());
+        vo.setCanEdit(isOwner);
+        vo.setCanDelete(isOwner);
+        return vo;
     }
 
     // 新增文章

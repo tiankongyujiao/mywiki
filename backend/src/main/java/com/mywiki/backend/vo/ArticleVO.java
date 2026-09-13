@@ -17,4 +17,9 @@ public class ArticleVO {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    // 权限由后端统一计算后下发，前端只负责展示
+    private Boolean canEdit;
+
+    private Boolean canDelete;
 }

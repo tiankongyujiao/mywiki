@@ -32,9 +32,22 @@ public class JwtInterceptor implements HandlerInterceptor {
 
         String method = request.getMethod();
 
-        // 查看文章不需要登录
+        // 查看文章不需要登录，但若带了 token 则解析出身份，供"是否作者"判断使用
         if ("GET".equalsIgnoreCase(method)
                 && request.getRequestURI().startsWith("/articles")) {
+
+            String getAuth = request.getHeader("Authorization");
+            if (getAuth != null && getAuth.startsWith("Bearer ")) {
+                try {
+                    Claims getClaims = jwtUtil.parseToken(getAuth.substring(7));
+                    request.setAttribute(
+                            "userId",
+                            Long.valueOf(getClaims.getSubject())
+                    );
+                } catch (Exception ignored) {
+                    // 无效/过期 token 按游客处理，照样放行
+                }
+            }
             return true;
         }
 

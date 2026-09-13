@@ -1,23 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { articleApi, type Article } from '../../api'
-import { useAuthStore } from '../../stores/auth'
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
 const loading = ref(false)
 const article = ref<Article>()
-
-// 仅作者本人显示编辑/删除按钮；删除仍由后端做权限校验
-const isOwner = computed(
-  () =>
-    !!authStore.user?.id &&
-    !!article.value?.userId &&
-    String(authStore.user.id) === String(article.value.userId),
-)
 
 const backToList = () => router.push('/articles')
 
@@ -63,10 +53,8 @@ onMounted(fetchDetail)
       <div class="header">
         <span class="title">{{ article?.title }}</span>
         <div>
-          <template v-if="isOwner">
-            <el-button type="primary" @click="goEdit">编辑</el-button>
-            <el-button type="danger" @click="handleDelete">删除</el-button>
-          </template>
+          <el-button v-if="article?.canEdit" type="primary" @click="goEdit">编辑</el-button>
+          <el-button v-if="article?.canDelete" type="danger" @click="handleDelete">删除</el-button>
           <el-button @click="backToList">返回列表</el-button>
         </div>
       </div>

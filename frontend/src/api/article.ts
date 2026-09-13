@@ -9,6 +9,9 @@ export interface Article {
   createTime?: unknown
   createdAt?: unknown
   updatedAt?: unknown
+  // 后端按"当前登录用户是否作者"计算后下发，前端直接用
+  canEdit?: boolean
+  canDelete?: boolean
 }
 
 export interface ArticlePayload {
