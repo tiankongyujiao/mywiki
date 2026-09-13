@@ -1,31 +1,20 @@
 package com.mywiki.backend.vo;
+import lombok.Data;
+import java.time.LocalDateTime;
 
+@Data
 public class ArticleVO {
     private Long id;
+    
     private String title;
-    private String authorName;
 
-    public Long getId() {
-        return id;
-    }
+    private String content;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    private Long userId;
 
-    public String getTitle() {
-        return title;
-    }
+    private String username;
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    private LocalDateTime createdAt;
 
-    public String getAuthorName() {
-        return authorName;
-    }
-
-    public void setAuthorName(String authorName) {
-        this.authorName = authorName;
-    }
+    private LocalDateTime updatedAt;
 }

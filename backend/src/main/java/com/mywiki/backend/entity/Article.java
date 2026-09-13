@@ -13,4 +13,5 @@ public class Article {
     private String content;
     private Long userId;
     private LocalDateTime createTime;
+    private LocalDateTime updateTime;
 }

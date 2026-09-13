@@ -1,16 +1,38 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { articleApi, type Article } from '../../api'
+import { useAuthStore } from '../../stores/auth'
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 const loading = ref(false)
 const article = ref<Article>()
+
+// 仅作者本人显示编辑/删除按钮；删除仍由后端做权限校验
+const isOwner = computed(
+  () =>
+    !!authStore.user?.id &&
+    !!article.value?.userId &&
+    String(authStore.user.id) === String(article.value.userId),
+)
 
 const backToList = () => router.push('/articles')
 
 const goEdit = () => router.push(`/articles/${article.value?.id}/edit`)
+
+const handleDelete = async () => {
+  if (!article.value) return
+  await ElMessageBox.confirm(`确定删除文章「${article.value.title}」吗？`, '提示', {
+    type: 'warning',
+  })
+  // 无权限时后端返回 403，request 拦截器会统一提示
+  await articleApi.remove(article.value.id)
+  ElMessage.success('删除成功')
+  router.push('/articles')
+}
 
 const fetchDetail = async () => {
   loading.value = true
@@ -41,19 +63,24 @@ onMounted(fetchDetail)
       <div class="header">
         <span class="title">{{ article?.title }}</span>
         <div>
-          <el-button type="primary" @click="goEdit"> 编辑 </el-button>
+          <template v-if="isOwner">
+            <el-button type="primary" @click="goEdit">编辑</el-button>
+            <el-button type="danger" @click="handleDelete">删除</el-button>
+          </template>
           <el-button @click="backToList">返回列表</el-button>
         </div>
       </div>
     </template>
 
     <el-descriptions :column="2" border>
-      <el-descriptions-item label="ID">{{ article?.id }}</el-descriptions-item>
-      <el-descriptions-item label="创建时间">
-        {{ formatTime(article?.createTime) }}
+      <el-descriptions-item label="作者">
+        {{ article?.username || '-' }}
       </el-descriptions-item>
-      <el-descriptions-item label="标题" :span="2">
-        {{ article?.title }}
+      <el-descriptions-item label="创建时间">
+        {{ formatTime(article?.createdAt) }}
+      </el-descriptions-item>
+      <el-descriptions-item label="更新时间" :span="2">
+        {{ formatTime(article?.updatedAt) }}
       </el-descriptions-item>
       <el-descriptions-item label="内容" :span="2">
         <div class="content">{{ article?.content }}</div>

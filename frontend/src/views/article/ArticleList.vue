@@ -5,8 +5,16 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, View, Edit, Delete } from '@element-plus/icons-vue'
 import { articleApi, type Article } from '../../api'
 import { articlePager } from './pager'
+import { useAuthStore } from '../../stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
+
+// 仅作者本人显示编辑/删除按钮；删除/修改仍由后端做权限校验
+const isOwner = (row: Article) =>
+  !!authStore.user?.id &&
+  !!row.userId &&
+  String(authStore.user.id) === String(row.userId)
 const loading = ref(false)
 const records = ref<Article[]>([])
 const total = ref(0)
@@ -99,8 +107,10 @@ onMounted(fetchList)
       <el-table-column label="操作" width="220" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" :icon="View" @click="handleView(row)">查看</el-button>
-          <el-button link type="primary" :icon="Edit" @click="handleEdit(row)">编辑</el-button>
-          <el-button link type="danger" :icon="Delete" @click="handleDelete(row)">删除</el-button>
+          <template v-if="isOwner(row)">
+            <el-button link type="primary" :icon="Edit" @click="handleEdit(row)">编辑</el-button>
+            <el-button link type="danger" :icon="Delete" @click="handleDelete(row)">删除</el-button>
+          </template>
         </template>
       </el-table-column>
     </el-table>

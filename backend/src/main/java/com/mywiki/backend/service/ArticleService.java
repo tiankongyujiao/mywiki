@@ -2,7 +2,10 @@ package com.mywiki.backend.service;
 
 import com.mywiki.backend.dto.ArticleCreateDTO;
 import com.mywiki.backend.entity.Article;
+import com.mywiki.backend.entity.User;
 import com.mywiki.backend.mapper.ArticleMapper;
+import com.mywiki.backend.mapper.UserMapper;
+import com.mywiki.backend.vo.ArticleVO;
 import org.springframework.stereotype.Service;
 import com.mywiki.backend.common.ErrorCode;
 import com.mywiki.backend.exception.BusinessException;
@@ -10,23 +13,35 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class ArticleService {
     private final ArticleMapper articleMapper;
+    private final UserMapper userMapper;
 
-    public ArticleService(ArticleMapper articleMapper){
+    public ArticleService(ArticleMapper articleMapper, UserMapper userMapper){
         this.articleMapper = articleMapper;
+        this.userMapper = userMapper;
     }
 
     // 查询详情
-    public Article getById(Long id){
+    public ArticleVO getById(Long id){
         Article article = articleMapper.selectById(id);
         if(article == null){
             throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
         }
-        return article;
+        User author = userMapper.selectById(article.getUserId());
+        ArticleVO vo = new ArticleVO();
+        vo.setId(article.getId());
+        vo.setTitle(article.getTitle());
+        vo.setContent(article.getContent());
+        vo.setUserId(article.getUserId());
+        vo.setUsername(author == null ? null : author.getUsername());
+        vo.setCreatedAt(article.getCreateTime());
+        vo.setUpdatedAt(article.getUpdateTime());
+        return vo;
     }
 
     // 查询列表
@@ -71,6 +86,7 @@ public class ArticleService {
         }
         article.setTitle(dto.getTitle());
         article.setContent(dto.getContent());
+        article.setUpdateTime(LocalDateTime.now());
         articleMapper.updateById(article);
     }
 

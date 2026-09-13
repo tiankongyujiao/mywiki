@@ -1,9 +1,16 @@
 import { defineStore } from 'pinia'
 import { userApi } from '../api/user'
 
+/**
+ * @typedef {Object} UserInfo
+ * @property {string} id
+ * @property {string} username
+ */
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: localStorage.getItem('token'),
+    /** @type {UserInfo | null} */
     user: null
   }),
 

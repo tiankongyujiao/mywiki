@@ -1,8 +1,8 @@
 package com.mywiki.backend.controller;
 
 import com.mywiki.backend.dto.ArticleCreateDTO;
-import com.mywiki.backend.entity.Article;
 import com.mywiki.backend.service.ArticleService;
+import com.mywiki.backend.vo.ArticleVO;
 import org.springframework.web.bind.annotation.*;
 import com.mywiki.backend.common.Result;
 
@@ -42,9 +42,8 @@ public class ArticleController {
 
     // 查询详情
     @GetMapping("/{id}")
-    public Result<Article> get(@PathVariable Long id){
-        Article article = articleService.getById(id);
-        return Result.success(article);
+    public Result<ArticleVO> get(@PathVariable Long id){
+        return Result.success(articleService.getById(id));
     }
 
     // 创建

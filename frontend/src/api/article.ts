@@ -5,7 +5,10 @@ export interface Article {
   title: string
   content: string
   userId?: string
+  username?: string
   createTime?: unknown
+  createdAt?: unknown
+  updatedAt?: unknown
 }
 
 export interface ArticlePayload {
