@@ -4,7 +4,12 @@ import com.mywiki.backend.dto.UserRegisterDTO;
 import com.mywiki.backend.service.UserService;
 import com.mywiki.backend.common.Result;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+;
 
 import com.mywiki.backend.dto.UserLoginDTO;
 import com.mywiki.backend.vo.UserVO;

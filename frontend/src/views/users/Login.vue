@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { userApi, type UserLoginPayload } from '../../api'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
+const route = useRoute()
 const router = useRouter()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
@@ -24,7 +25,9 @@ const onSubmit = async () => {
     // console.log(res.token)
     authStore.setLogin({ token: res.token })
     ElMessage.success('登录成功')
-    router.push('/articles')
+    // 登录前如果是从"发表评论/需要登录"的页面跳过来的，登录后跳回原页面
+    const redirect = (route.query.redirect as string) || '/articles'
+    router.push(redirect)
   } finally {
     loading.value = false
   }
