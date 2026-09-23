@@ -72,4 +72,45 @@ public class CommentService {
         }
         return result;
     }
+
+    public void deleteComment(Long articleId, Long commentId, Long userId) {
+        // 1. 查询评论
+        Comment comment = commentMapper.selectById(commentId);
+
+        if (comment == null) {
+            throw new BusinessException(
+                ErrorCode.COMMENT_NOT_FOUND
+            );
+        }
+
+        // 2. 校验评论确实属于 URL 中指定的那篇文章
+        if (!comment.getArticleId().equals(articleId)) {
+            throw new BusinessException(
+                ErrorCode.COMMENT_NOT_FOUND
+            );
+        }
+
+        // 3. 查询文章
+        Article article = articleMapper.selectById(comment.getArticleId());
+
+        if (article == null) {
+            throw new BusinessException(
+                ErrorCode.ARTICLE_NOT_FOUND
+            );
+        }
+
+        // 4. 判断权限
+        boolean isCommentOwner = comment.getUserId().equals(userId);
+
+        boolean isArticleOwner = article.getUserId().equals(userId);
+
+        if (!isCommentOwner && !isArticleOwner) {
+            throw new BusinessException(
+                ErrorCode.FORBIDDEN
+            );
+        }
+
+        // 5. 删除
+        commentMapper.deleteById(commentId);
+    }
 }

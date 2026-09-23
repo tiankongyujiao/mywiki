@@ -45,6 +45,23 @@ const goLogin = () => {
   })
 }
 
+// 是否有权限删除该评论：评论作者或文章作者
+const canDeleteComment = (comment: Comment): boolean => {
+  if (!authStore.isLogin || !authStore.user) return false
+  const uid = String(authStore.user.id)
+  return String(comment.userId) === uid || String(article.value?.userId) === uid
+}
+
+const handleDeleteComment = async (comment: Comment) => {
+  await ElMessageBox.confirm(`确定删除该评论吗？`, '提示', {
+    type: 'warning',
+  })
+  // 无权限时后端返回 403，request 拦截器会统一提示
+  await articleApi.deleteComment(route.params.id as string, comment.id)
+  ElMessage.success('删除成功')
+  await fetchComments()
+}
+
 const backToList = () => router.push('/articles')
 
 const goEdit = () => router.push(`/articles/${article.value?.id}/edit`)
@@ -146,6 +163,15 @@ onMounted(() => {
         <div class="comment-meta">
           <span class="comment-user">{{ c.username || '匿名' }}</span>
           <span class="comment-time">{{ formatTime(c.createdAt) }}</span>
+          <el-button
+            v-if="canDeleteComment(c)"
+            type="danger"
+            link
+            size="small"
+            @click="handleDeleteComment(c)"
+          >
+            删除
+          </el-button>
         </div>
         <div class="comment-content">{{ c.content }}</div>
       </div>

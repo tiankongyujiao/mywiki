@@ -59,4 +59,7 @@ export const articleApi = {
   // 发表评论（需登录，token 由 request 拦截器自动带上）
   createComment: (articleId: number | string, data: { content: string }) =>
     request.post<unknown, void>(`/articles/${articleId}/comments`, data),
+  // 删除评论（需登录，评论作者或文章作者可删，token 由 request 拦截器自动带上）
+  deleteComment: (articleId: number | string, commentId: number | string) =>
+    request.delete<unknown, void>(`/articles/${articleId}/comments/${commentId}`),
 }

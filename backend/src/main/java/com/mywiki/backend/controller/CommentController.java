@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.List;
 
@@ -39,6 +40,17 @@ public class CommentController {
             @CurrentUser Long userId
     ) {
         commentService.createComment(articleId, userId, dto);
+        return Result.success(null);
+    }
+
+    // 删除评论（需登录，评论作者或文章作者可删）
+    @DeleteMapping("/{articleId}/comments/{commentId}")
+    public Result<Void> delete(
+            @PathVariable Long articleId,
+            @PathVariable Long commentId,
+            @CurrentUser Long userId
+    ) {
+        commentService.deleteComment(articleId, commentId, userId);
         return Result.success(null);
     }
 }

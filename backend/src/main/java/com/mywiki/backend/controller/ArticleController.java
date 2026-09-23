@@ -4,6 +4,7 @@ import com.mywiki.backend.dto.ArticleCreateDTO;
 import com.mywiki.backend.service.ArticleService;
 import com.mywiki.backend.vo.ArticleVO;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

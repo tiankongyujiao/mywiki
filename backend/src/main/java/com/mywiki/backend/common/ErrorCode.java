@@ -8,7 +8,11 @@ public enum ErrorCode {
     LOGIN_FAILED(10004, "用户名或密码错误", 401),
     SYSTEM_ERROR(50000, "系统异常", 500),
     NO_PERMISSION(10005, "无权操作该文章", 403),
-    USER_NOT_FOUND(10006, "用户不存在", 404);
+    USER_NOT_FOUND(10006, "用户不存在", 404),
+    COMMENT_NOT_FOUND(10007, "评论不存在", 404),
+    FORBIDDEN(10008, "无权操作该评论", 403);
+
+
 
     private final Integer code;
     private final String message;
