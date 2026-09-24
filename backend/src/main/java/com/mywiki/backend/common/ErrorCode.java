@@ -10,7 +10,8 @@ public enum ErrorCode {
     NO_PERMISSION(10005, "无权操作该文章", 403),
     USER_NOT_FOUND(10006, "用户不存在", 404),
     COMMENT_NOT_FOUND(10007, "评论不存在", 404),
-    FORBIDDEN(10008, "无权操作该评论", 403);
+    FORBIDDEN(10008, "无权操作该评论", 403),
+    CATEGORY_NAME_EXIST(10009, "分类名称已存在", 400);
 
 
 

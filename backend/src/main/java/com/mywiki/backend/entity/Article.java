@@ -12,6 +12,7 @@ public class Article {
     private String title;
     private String content;
     private Long userId;
+    private Long categoryId;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }
