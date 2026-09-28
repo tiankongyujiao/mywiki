@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import jakarta.validation.Valid;
+import com.mywiki.backend.annotation.CurrentUser;
 
 @RestController
 @RequestMapping("/categories")
@@ -33,9 +34,10 @@ public class CategoryController {
 
     @PostMapping
     public Result<?> createCategory(
-            @Valid @RequestBody CategoryCreateDTO dto
+            @Valid @RequestBody CategoryCreateDTO dto,
+            @CurrentUser Long userId
     ) {
-        categoryService.createCategory(dto);
+        categoryService.createCategory(dto, userId);
         return Result.success(null);
     }
 }

@@ -57,6 +57,7 @@ public class UserService {
         user.setPassword(
                 passwordEncoder.encode(dto.getPassword())
         );
+        user.setRole("USER");
 
         try {
             userMapper.insert(user);
