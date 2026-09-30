@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Document } from '@element-plus/icons-vue'
+import { Document, Collection } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 
@@ -33,6 +33,10 @@ const onLogout = () => {
         <el-menu-item index="/articles">
           <el-icon><Document /></el-icon>
           <span>文章管理</span>
+        </el-menu-item>
+        <el-menu-item index="/categories">
+          <el-icon><Collection /></el-icon>
+          <span>分类管理</span>
         </el-menu-item>
       </el-menu>
     </el-aside>

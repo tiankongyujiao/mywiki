@@ -12,7 +12,9 @@ public enum ErrorCode {
     COMMENT_NOT_FOUND(10007, "评论不存在", 404),
     FORBIDDEN(10008, "无权操作该评论", 403),
     CATEGORY_NAME_EXIST(10009, "分类名称已存在", 400),
-    CATEGORY_ADMIN_ONLY(10010, "只有管理员才能创建分类", 403);
+    CATEGORY_ADMIN_ONLY(10010, "只有管理员才能创建分类", 403),
+    CATEGORY_NOT_FOUND(10011, "分类不存在", 400),
+    CATEGORY_IN_USE(10012, "该分类下还有文章，无法删除", 400);
 
 
 

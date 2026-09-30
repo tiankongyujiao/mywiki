@@ -46,6 +46,12 @@ const router = createRouter({
           component: () => import('../views/article/ArticleForm.vue'),
           meta: { title: '编辑文章', requiresAuth: true },
         },
+        {
+          path: 'categories',
+          name: 'CategoryList',
+          component: () => import('../views/category/CategoryList.vue'),
+          meta: { title: '分类管理', requiresAuth: true },
+        },
       ],
     },
   ],

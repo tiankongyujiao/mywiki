@@ -5,6 +5,7 @@ import { userApi } from '../api/user'
  * @typedef {Object} UserInfo
  * @property {string} id
  * @property {string} username
+ * @property {string} [role]
  */
 
 export const useAuthStore = defineStore('auth', {

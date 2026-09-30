@@ -19,6 +19,7 @@ export interface UserLoginResponse {
 export interface UserVO {
   id: number
   username: string
+  role?: string
 }
 
 export const userApi = {

@@ -120,6 +120,7 @@ public class UserService {
 
         vo.setId(user.getId());
         vo.setUsername(user.getUsername());
+        vo.setRole(user.getRole());
         return vo;
     }
 }
