@@ -6,6 +6,8 @@ export interface Article {
   content: string
   userId?: string
   username?: string
+  categoryId?: string | null
+  categoryName?: string | null
   createTime?: unknown
   createdAt?: unknown
   updatedAt?: unknown
@@ -17,6 +19,7 @@ export interface Article {
 export interface ArticlePayload {
   title: string
   content: string
+  categoryId?: number | string | null
 }
 
 export interface ArticlePageQuery {

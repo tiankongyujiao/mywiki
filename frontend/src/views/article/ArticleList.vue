@@ -93,6 +93,9 @@ onMounted(fetchList)
       <el-table-column prop="id" label="ID" width="180" show-overflow-tooltip />
       <el-table-column prop="title" label="标题" min-width="180" show-overflow-tooltip />
       <el-table-column prop="content" label="内容" min-width="260" show-overflow-tooltip />
+      <el-table-column label="分类" width="140" show-overflow-tooltip>
+        <template #default="{ row }">{{ row.categoryName || '-' }}</template>
+      </el-table-column>
       <el-table-column label="创建时间" width="180">
         <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
       </el-table-column>

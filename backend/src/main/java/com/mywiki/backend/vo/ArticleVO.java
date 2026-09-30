@@ -14,6 +14,10 @@ public class ArticleVO {
 
     private String username;
 
+    private Long categoryId;
+
+    private String categoryName;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

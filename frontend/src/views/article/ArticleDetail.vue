@@ -120,6 +120,9 @@ onMounted(() => {
       <el-descriptions-item label="作者">
         {{ article?.username || '-' }}
       </el-descriptions-item>
+      <el-descriptions-item label="分类">
+        {{ article?.categoryName || '-' }}
+      </el-descriptions-item>
       <el-descriptions-item label="创建时间">
         {{ formatTime(article?.createdAt) }}
       </el-descriptions-item>

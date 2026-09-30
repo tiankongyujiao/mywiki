@@ -16,4 +16,7 @@ public class ArticleCreateDTO {
 
     @NotBlank(message = "内容不能为空")
     private String content;
+
+    // 所属分类，可为空
+    private Long categoryId;
 }

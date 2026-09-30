@@ -2,7 +2,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
-import { articleApi, type ArticlePayload } from '../../api'
+import { articleApi, categoryApi, type ArticlePayload, type Category } from '../../api'
 import { articlePager } from './pager'
 
 const route = useRoute()
@@ -11,7 +11,8 @@ const isEdit = computed(() => route.name === 'ArticleEdit')
 
 const formRef = ref<FormInstance>()
 const loading = ref(false)
-const form = reactive<ArticlePayload>({ title: '', content: '' })
+const categories = ref<Category[]>([])
+const form = reactive<ArticlePayload>({ title: '', content: '', categoryId: null })
 const rules: FormRules = {
   title: [
     { required: true, message: '请输入标题', trigger: 'blur' },
@@ -20,10 +21,15 @@ const rules: FormRules = {
   content: [{ required: true, message: '请输入内容', trigger: 'blur' }],
 }
 
+const fetchCategories = async () => {
+  categories.value = await categoryApi.list()
+}
+
 const fetchDetail = async () => {
   const data = await articleApi.getById(route.params.id as string)
   form.title = data.title
   form.content = data.content
+  form.categoryId = data.categoryId ?? null
 }
 
 const backToList = () => router.push('/articles')
@@ -33,7 +39,11 @@ const onSubmit = async () => {
   await formRef.value.validate()
   loading.value = true
   try {
-    const payload: ArticlePayload = { title: form.title, content: form.content }
+    const payload: ArticlePayload = {
+      title: form.title,
+      content: form.content,
+      categoryId: form.categoryId ?? null,
+    }
     if (isEdit.value) {
       await articleApi.update(route.params.id as string, payload)
       ElMessage.success('修改成功')
@@ -50,6 +60,7 @@ const onSubmit = async () => {
 }
 
 onMounted(() => {
+  fetchCategories()
   if (isEdit.value) fetchDetail()
 })
 </script>
@@ -71,6 +82,21 @@ onMounted(() => {
           show-word-limit
           placeholder="请输入标题"
         />
+      </el-form-item>
+      <el-form-item label="分类" prop="categoryId">
+        <el-select
+          v-model="form.categoryId"
+          clearable
+          placeholder="请选择分类（可选）"
+          style="width: 240px"
+        >
+          <el-option
+            v-for="c in categories"
+            :key="c.id"
+            :label="c.name"
+            :value="c.id"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="内容" prop="content">
         <el-input
