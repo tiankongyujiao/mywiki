@@ -123,6 +123,19 @@ onMounted(() => {
       <el-descriptions-item label="分类">
         {{ article?.categoryName || '-' }}
       </el-descriptions-item>
+      <el-descriptions-item label="标签">
+        <template v-if="article?.tags?.length">
+          <el-tag
+            v-for="t in article.tags"
+            :key="t"
+            size="small"
+            style="margin-right: 6px"
+          >
+            {{ t }}
+          </el-tag>
+        </template>
+        <span v-else>-</span>
+      </el-descriptions-item>
       <el-descriptions-item label="创建时间">
         {{ formatTime(article?.createdAt) }}
       </el-descriptions-item>

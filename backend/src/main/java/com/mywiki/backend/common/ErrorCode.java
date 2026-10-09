@@ -14,7 +14,11 @@ public enum ErrorCode {
     CATEGORY_NAME_EXIST(10009, "分类名称已存在", 400),
     CATEGORY_ADMIN_ONLY(10010, "只有管理员才能创建分类", 403),
     CATEGORY_NOT_FOUND(10011, "分类不存在", 400),
-    CATEGORY_IN_USE(10012, "该分类下还有文章，无法删除", 400);
+    CATEGORY_IN_USE(10012, "该分类下还有文章，无法删除", 400),
+    TAG_NAME_EXIST(10013, "标签名称已存在", 400),
+    TAG_ADMIN_ONLY(10014, "只有管理员才能管理标签", 403),
+    TAG_NOT_FOUND(10015, "标签不存在", 404),
+    TAG_IN_USE(10016, "该标签下还有文章，无法删除", 400);
 
 
 

@@ -45,10 +45,11 @@ public class ArticleController {
         @RequestParam(defaultValue = "10") long size,
         @RequestParam(required = false) String keyword,
         @RequestParam(required = false) Long categoryId,
+        @RequestParam(required = false) Long tagId,
         HttpServletRequest request
     ) {
         return Result.success(
-                articleService.page(page, size, keyword, categoryId, currentUserId(request))
+                articleService.page(page, size, keyword, categoryId, tagId, currentUserId(request))
         );
     }
 

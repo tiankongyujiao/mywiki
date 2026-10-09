@@ -28,11 +28,13 @@ public class ArticleService {
     private final ArticleMapper articleMapper;
     private final UserMapper userMapper;
     private final CategoryMapper categoryMapper;
+    private final TagService tagService;
 
-    public ArticleService(ArticleMapper articleMapper, UserMapper userMapper, CategoryMapper categoryMapper){
+    public ArticleService(ArticleMapper articleMapper, UserMapper userMapper, CategoryMapper categoryMapper, TagService tagService){
         this.articleMapper = articleMapper;
         this.userMapper = userMapper;
         this.categoryMapper = categoryMapper;
+        this.tagService = tagService;
     }
 
     // 查询详情（游客可访问，currentUserId 可能为 null）
@@ -48,6 +50,8 @@ public class ArticleService {
             Category category = categoryMapper.selectById(article.getCategoryId());
             vo.setCategoryName(category == null ? null : category.getName());
         }
+        vo.setTags(tagService.getTagNamesByArticleIds(List.of(id))
+                .getOrDefault(id, List.of()));
         return vo;
     }
 
@@ -56,7 +60,7 @@ public class ArticleService {
     //     return articleMapper.selectList(null);
     // }
 
-    public Page<ArticleVO> page(long current, long size, String keyword, Long categoryId, Long currentUserId) {
+    public Page<ArticleVO> page(long current, long size, String keyword, Long categoryId, Long tagId, Long currentUserId) {
         Page<Article> page = new Page<>(current, size);
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -69,6 +73,10 @@ public class ArticleService {
         if (categoryId != null) {
             wrapper.eq(Article::getCategoryId, categoryId);
         }
+        if (tagId != null) {
+            // 按标签筛选：文章 id 属于该标签的关联集合
+            wrapper.apply("id IN (SELECT article_id FROM article_tag WHERE tag_id = {0})", tagId);
+        }
         wrapper.orderByDesc(
             Article::getCreateTime
         );
@@ -76,6 +84,8 @@ public class ArticleService {
 
         Page<ArticleVO> voPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
         Map<Long, String> categoryNames = loadCategoryNames(page.getRecords());
+        Map<Long, List<String>> tagNames = tagService.getTagNamesByArticleIds(
+                page.getRecords().stream().map(Article::getId).toList());
         voPage.setRecords(
             page.getRecords().stream()
                 .map(a -> {
@@ -83,6 +93,7 @@ public class ArticleService {
                     if (a.getCategoryId() != null) {
                         vo.setCategoryName(categoryNames.get(a.getCategoryId()));
                     }
+                    vo.setTags(tagNames.getOrDefault(a.getId(), List.of()));
                     return vo;
                 })
                 .toList()
@@ -139,6 +150,7 @@ public class ArticleService {
         article.setUserId(userId);
         article.setCategoryId(resolveCategoryId(dto.getCategoryId()));
         articleMapper.insert(article);
+        tagService.syncArticleTags(article.getId(), dto.getTags());
     }
 
     // 修改文章
@@ -158,6 +170,7 @@ public class ArticleService {
                 .set(Article::getCategoryId, resolveCategoryId(dto.getCategoryId()))
                 .set(Article::getUpdateTime, LocalDateTime.now());
         articleMapper.update(null, wrapper);
+        tagService.syncArticleTags(id, dto.getTags());
     }
 
     // 删除文章
@@ -173,5 +186,6 @@ public class ArticleService {
         }
 
         articleMapper.deleteById(id);
+        tagService.removeArticleTags(id);
     }
 }

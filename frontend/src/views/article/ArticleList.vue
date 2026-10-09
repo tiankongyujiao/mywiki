@@ -3,7 +3,7 @@ import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, View, Edit, Delete } from '@element-plus/icons-vue'
-import { articleApi, categoryApi, type Article, type Category } from '../../api'
+import { articleApi, categoryApi, tagApi, type Article, type Category, type Tag } from '../../api'
 import { articlePager } from './pager'
 
 const router = useRouter()
@@ -12,12 +12,18 @@ const records = ref<Article[]>([])
 const total = ref(0)
 const keyword = ref('')
 const categories = ref<Category[]>([])
+const tags = ref<Tag[]>([])
 const selectedCategoryId = ref<string | number | undefined>(undefined)
+const selectedTagId = ref<string | number | undefined>(undefined)
 const currentPage = ref(articlePager.page)
 const pageSize = ref(articlePager.size)
 
 const fetchCategories = async () => {
   categories.value = await categoryApi.list()
+}
+
+const fetchTags = async () => {
+  tags.value = await tagApi.list()
 }
 
 const fetchList = async () => {
@@ -28,6 +34,7 @@ const fetchList = async () => {
       size: pageSize.value,
       keyword: keyword.value.trim() || undefined,
       categoryId: selectedCategoryId.value ?? undefined,
+      tagId: selectedTagId.value ?? undefined,
     })
     records.value = data.records
     total.value = Number(data.total) || 0
@@ -80,6 +87,7 @@ const formatTime = (t: unknown): string => {
 
 onMounted(() => {
   fetchCategories()
+  fetchTags()
   fetchList()
 })
 </script>
@@ -111,6 +119,21 @@ onMounted(() => {
             :value="c.id"
           />
         </el-select>
+        <el-select
+          v-model="selectedTagId"
+          placeholder="按标签筛选"
+          clearable
+          filterable
+          style="width: 200px"
+          @change="handleSearch"
+        >
+          <el-option
+            v-for="t in tags"
+            :key="t.id"
+            :label="`${t.name} (${t.articleCount ?? 0})`"
+            :value="t.id"
+          />
+        </el-select>
       </div>
       <el-button type="primary" :icon="Plus" @click="handleAdd">新增文章</el-button>
     </div>
@@ -121,6 +144,19 @@ onMounted(() => {
       <el-table-column prop="content" label="内容" min-width="260" show-overflow-tooltip />
       <el-table-column label="分类" width="140" show-overflow-tooltip>
         <template #default="{ row }">{{ row.categoryName || '-' }}</template>
+      </el-table-column>
+      <el-table-column label="标签" min-width="180">
+        <template #default="{ row }">
+          <el-tag
+            v-for="t in row.tags || []"
+            :key="t"
+            size="small"
+            style="margin-right: 6px"
+          >
+            {{ t }}
+          </el-tag>
+          <span v-if="!row.tags || !row.tags.length">-</span>
+        </template>
       </el-table-column>
       <el-table-column label="创建时间" width="180">
         <template #default="{ row }">{{ formatTime(row.createTime) }}</template>

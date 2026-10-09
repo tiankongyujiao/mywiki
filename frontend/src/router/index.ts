@@ -52,6 +52,12 @@ const router = createRouter({
           component: () => import('../views/category/CategoryList.vue'),
           meta: { title: '分类管理', requiresAuth: true },
         },
+        {
+          path: 'tags',
+          name: 'TagList',
+          component: () => import('../views/tag/TagList.vue'),
+          meta: { title: '标签管理', requiresAuth: true },
+        },
       ],
     },
   ],

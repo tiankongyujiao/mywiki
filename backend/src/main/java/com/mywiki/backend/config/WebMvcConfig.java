@@ -29,7 +29,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/articles/**",
                         "/users/me",
                         "/categories",
-                        "/categories/**"
+                        "/categories/**",
+                        "/tags",
+                        "/tags/**"
                 );
     }
 

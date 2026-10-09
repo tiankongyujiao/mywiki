@@ -1,6 +1,8 @@
 package com.mywiki.backend.vo;
 import lombok.Data;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class ArticleVO {
@@ -17,6 +19,9 @@ public class ArticleVO {
     private Long categoryId;
 
     private String categoryName;
+
+    // 标签名列表
+    private List<String> tags;
 
     private LocalDateTime createdAt;
 

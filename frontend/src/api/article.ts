@@ -8,6 +8,7 @@ export interface Article {
   username?: string
   categoryId?: string | null
   categoryName?: string | null
+  tags?: string[]
   createTime?: unknown
   createdAt?: unknown
   updatedAt?: unknown
@@ -20,6 +21,7 @@ export interface ArticlePayload {
   title: string
   content: string
   categoryId?: number | string | null
+  tags?: string[]
 }
 
 export interface ArticlePageQuery {
@@ -27,6 +29,7 @@ export interface ArticlePageQuery {
   size: number
   keyword?: string
   categoryId?: number | string
+  tagId?: number | string
 }
 
 export interface ArticlePage {

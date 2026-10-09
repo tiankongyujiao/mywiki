@@ -2,7 +2,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
-import { articleApi, categoryApi, type ArticlePayload, type Category } from '../../api'
+import { articleApi, categoryApi, tagApi, type ArticlePayload, type Category, type Tag } from '../../api'
 import { articlePager } from './pager'
 
 const route = useRoute()
@@ -12,7 +12,8 @@ const isEdit = computed(() => route.name === 'ArticleEdit')
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const categories = ref<Category[]>([])
-const form = reactive<ArticlePayload>({ title: '', content: '', categoryId: null })
+const tags = ref<Tag[]>([])
+const form = reactive<ArticlePayload>({ title: '', content: '', categoryId: null, tags: [] })
 const rules: FormRules = {
   title: [
     { required: true, message: '请输入标题', trigger: 'blur' },
@@ -25,11 +26,16 @@ const fetchCategories = async () => {
   categories.value = await categoryApi.list()
 }
 
+const fetchTags = async () => {
+  tags.value = await tagApi.list()
+}
+
 const fetchDetail = async () => {
   const data = await articleApi.getById(route.params.id as string)
   form.title = data.title
   form.content = data.content
   form.categoryId = data.categoryId ?? null
+  form.tags = data.tags ?? []
 }
 
 const backToList = () => router.push('/articles')
@@ -43,6 +49,7 @@ const onSubmit = async () => {
       title: form.title,
       content: form.content,
       categoryId: form.categoryId ?? null,
+      tags: form.tags ?? [],
     }
     if (isEdit.value) {
       await articleApi.update(route.params.id as string, payload)
@@ -61,6 +68,7 @@ const onSubmit = async () => {
 
 onMounted(() => {
   fetchCategories()
+  fetchTags()
   if (isEdit.value) fetchDetail()
 })
 </script>
@@ -95,6 +103,25 @@ onMounted(() => {
             :key="c.id"
             :label="c.name"
             :value="c.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="标签" prop="tags">
+        <el-select
+          v-model="form.tags"
+          multiple
+          filterable
+          allow-create
+          default-first-option
+          clearable
+          placeholder="请选择或输入标签（可选，回车可创建新标签）"
+          style="width: 100%"
+        >
+          <el-option
+            v-for="t in tags"
+            :key="t.id"
+            :label="t.name"
+            :value="t.name"
           />
         </el-select>
       </el-form-item>
