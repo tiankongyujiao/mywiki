@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
-import { Plus, Edit, Delete } from '@element-plus/icons-vue'
+import { Plus, Search, Edit, Delete } from '@element-plus/icons-vue'
 import { categoryApi, type Category, type CategoryPayload } from '../../api'
 import { useAuthStore } from '@/stores/auth'
 
@@ -11,15 +11,55 @@ const isAdmin = computed(() => authStore.user?.role === 'ADMIN')
 
 const loading = ref(false)
 const records = ref<Category[]>([])
+const total = ref(0)
+const keyword = ref('')
+const currentPage = ref(1)
+const pageSize = ref(10)
+const sortField = ref<string | undefined>(undefined)
+const sortOrder = ref<string | undefined>(undefined)
 
 const fetchList = async () => {
   loading.value = true
   try {
-    records.value = await categoryApi.list()
+    const data = await categoryApi.page({
+      page: currentPage.value,
+      size: pageSize.value,
+      keyword: keyword.value.trim() || undefined,
+      sortField: sortField.value,
+      sortOrder: sortOrder.value,
+    })
+    records.value = data.records
+    total.value = Number(data.total) || 0
+    // 当前页被删空时回退一页（watch 会触发重新请求）
+    if (!records.value.length && currentPage.value > 1) {
+      currentPage.value -= 1
+    }
   } finally {
     loading.value = false
   }
 }
+
+const handleSearch = () => {
+  if (currentPage.value === 1) {
+    fetchList()
+  } else {
+    currentPage.value = 1
+  }
+}
+
+// el-table 自定义排序：prop 对应后端排序字段，order 为 ascending/descending/null
+const handleSortChange = ({ prop, order }: { prop: string; order: string | null }) => {
+  if (!order) {
+    sortField.value = undefined
+    sortOrder.value = undefined
+  } else {
+    sortField.value = prop
+    sortOrder.value = order === 'ascending' ? 'asc' : 'desc'
+  }
+  handleSearch()
+}
+
+watch([currentPage, pageSize], () => fetchList())
 
 // 新增 / 编辑弹窗
 const dialogVisible = ref(false)
@@ -95,17 +135,33 @@ onMounted(fetchList)
 <template>
   <el-card shadow="never">
     <div class="toolbar">
-      <span />
+      <el-input
+        v-model="keyword"
+        placeholder="按分类名称搜索"
+        clearable
+        :prefix-icon="Search"
+        style="width: 240px"
+        @keyup.enter="handleSearch"
+        @clear="handleSearch"
+      />
       <el-button v-if="isAdmin" type="primary" :icon="Plus" @click="openCreate">新增分类</el-button>
     </div>
 
-    <el-table :data="records" v-loading="loading" border stripe style="width: 100%">
+    <el-table
+      :data="records"
+      v-loading="loading"
+      border
+      stripe
+      style="width: 100%"
+      @sort-change="handleSortChange"
+    >
       <el-table-column prop="id" label="ID" width="180" show-overflow-tooltip />
-      <el-table-column prop="name" label="分类名称" min-width="200" show-overflow-tooltip />
-      <el-table-column label="创建时间" width="180">
+      <el-table-column prop="name" label="分类名称" min-width="200" show-overflow-tooltip sortable="custom" />
+      <el-table-column prop="articleCount" label="文章数量" width="120" sortable="custom" />
+      <el-table-column prop="createdAt" label="创建时间" width="180" sortable="custom">
         <template #default="{ row }">{{ formatTime(row.createdAt) }}</template>
       </el-table-column>
-      <el-table-column label="更新时间" width="180">
+      <el-table-column prop="updatedAt" label="更新时间" width="180" sortable="custom">
         <template #default="{ row }">{{ formatTime(row.updatedAt) }}</template>
       </el-table-column>
       <el-table-column v-if="isAdmin" label="操作" width="180" fixed="right">
@@ -115,6 +171,17 @@ onMounted(fetchList)
         </template>
       </el-table-column>
     </el-table>
+
+    <div class="pager">
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :total="total"
+        :page-sizes="[10, 20, 50]"
+        layout="total, sizes, prev, pager, next, jumper"
+        background
+      />
+    </div>
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="420px">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
@@ -141,5 +208,10 @@ onMounted(fetchList)
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+}
+.pager {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
 }
 </style>

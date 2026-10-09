@@ -3,7 +3,7 @@ import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, View, Edit, Delete } from '@element-plus/icons-vue'
-import { articleApi, type Article } from '../../api'
+import { articleApi, categoryApi, type Article, type Category } from '../../api'
 import { articlePager } from './pager'
 
 const router = useRouter()
@@ -11,8 +11,14 @@ const loading = ref(false)
 const records = ref<Article[]>([])
 const total = ref(0)
 const keyword = ref('')
+const categories = ref<Category[]>([])
+const selectedCategoryId = ref<string | number | undefined>(undefined)
 const currentPage = ref(articlePager.page)
 const pageSize = ref(articlePager.size)
+
+const fetchCategories = async () => {
+  categories.value = await categoryApi.list()
+}
 
 const fetchList = async () => {
   loading.value = true
@@ -21,6 +27,7 @@ const fetchList = async () => {
       page: currentPage.value,
       size: pageSize.value,
       keyword: keyword.value.trim() || undefined,
+      categoryId: selectedCategoryId.value ?? undefined,
     })
     records.value = data.records
     total.value = Number(data.total) || 0
@@ -71,21 +78,40 @@ const formatTime = (t: unknown): string => {
   return Number.isNaN(dt.getTime()) ? String(t) : dt.toLocaleString('zh-CN')
 }
 
-onMounted(fetchList)
+onMounted(() => {
+  fetchCategories()
+  fetchList()
+})
 </script>
 
 <template>
   <el-card shadow="never">
     <div class="toolbar">
-      <el-input
-        v-model="keyword"
-        placeholder="按标题搜索"
-        clearable
-        :prefix-icon="Search"
-        style="width: 240px"
-        @keyup.enter="handleSearch"
-        @clear="handleSearch"
-      />
+      <div class="filters">
+        <el-input
+          v-model="keyword"
+          placeholder="按标题搜索"
+          clearable
+          :prefix-icon="Search"
+          style="width: 240px"
+          @keyup.enter="handleSearch"
+          @clear="handleSearch"
+        />
+        <el-select
+          v-model="selectedCategoryId"
+          placeholder="按分类筛选"
+          clearable
+          style="width: 200px"
+          @change="handleSearch"
+        >
+          <el-option
+            v-for="c in categories"
+            :key="c.id"
+            :label="c.name"
+            :value="c.id"
+          />
+        </el-select>
+      </div>
       <el-button type="primary" :icon="Plus" @click="handleAdd">新增文章</el-button>
     </div>
 
@@ -127,6 +153,11 @@ onMounted(fetchList)
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+}
+.filters {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 .pager {
   display: flex;

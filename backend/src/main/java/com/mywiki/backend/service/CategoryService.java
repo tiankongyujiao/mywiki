@@ -1,6 +1,8 @@
 package com.mywiki.backend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mywiki.backend.common.ErrorCode;
 import com.mywiki.backend.entity.Category;
 import com.mywiki.backend.entity.User;
@@ -9,11 +11,17 @@ import com.mywiki.backend.mapper.UserMapper;
 import com.mywiki.backend.entity.Article;
 import com.mywiki.backend.mapper.ArticleMapper;
 import com.mywiki.backend.exception.BusinessException;
+import com.mywiki.backend.vo.CategoryVO;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import com.mywiki.backend.dto.CategoryCreateDTO;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
@@ -25,8 +33,79 @@ public class CategoryService {
         this.userMapper = userMapper;
         this.articleMapper = articleMapper;
     }
-    public List<Category> getAllCategories() {
-        return categoryMapper.selectList(null);
+    public List<CategoryVO> getAllCategories() {
+        return toCategoryVOs(categoryMapper.selectList(null));
+    }
+
+    // 分页 + 按名称搜索 + 排序（排序字段白名单，默认按创建时间倒序）
+    public Page<CategoryVO> pageCategories(long current, long size, String keyword, String sortField, String sortOrder) {
+        List<CategoryVO> all = toCategoryVOs(categoryMapper.selectList(null));
+
+        String kw = keyword == null ? null : keyword.trim().toLowerCase();
+        List<CategoryVO> filtered = (kw == null || kw.isEmpty())
+                ? all
+                : all.stream()
+                    .filter(c -> c.getName() != null && c.getName().toLowerCase().contains(kw))
+                    .toList();
+
+        List<CategoryVO> sorted = new ArrayList<>(filtered);
+        sorted.sort(resolveComparator(sortField, sortOrder));
+
+        // 内存分页：分类数据量小，可支持按文章数等任意字段排序
+        long from = Math.max(0, (current - 1) * size);
+        int start = (int) Math.min(from, sorted.size());
+        int end = (int) Math.min(from + size, sorted.size());
+        List<CategoryVO> records = sorted.subList(start, end);
+
+        Page<CategoryVO> page = new Page<>(current, size, sorted.size());
+        page.setRecords(records);
+        return page;
+    }
+
+    private Comparator<CategoryVO> resolveComparator(String sortField, String sortOrder) {
+        Comparator<CategoryVO> comparator;
+        switch (sortField == null ? "" : sortField) {
+            case "name":
+                comparator = Comparator.comparing(CategoryVO::getName, Comparator.nullsLast(String::compareTo));
+                break;
+            case "articleCount":
+                comparator = Comparator.comparing(CategoryVO::getArticleCount, Comparator.nullsLast(Long::compareTo));
+                break;
+            case "updatedAt":
+                comparator = Comparator.comparing(CategoryVO::getUpdatedAt, Comparator.nullsLast(LocalDateTime::compareTo));
+                break;
+            case "createdAt":
+            default:
+                comparator = Comparator.comparing(CategoryVO::getCreatedAt, Comparator.nullsLast(LocalDateTime::compareTo));
+        }
+        // 默认（含未传排序方向）按倒序
+        return "asc".equalsIgnoreCase(sortOrder) ? comparator : comparator.reversed();
+    }
+
+    private List<CategoryVO> toCategoryVOs(List<Category> categories) {
+        if (categories.isEmpty()) {
+            return List.of();
+        }
+        // 一次性按分类分组统计文章数，避免逐个分类 selectCount 的 N+1
+        QueryWrapper<Article> countWrapper = new QueryWrapper<>();
+        countWrapper.select("category_id", "count(*) AS cnt")
+                .isNotNull("category_id")
+                .groupBy("category_id");
+        Map<Long, Long> countByCategoryId = articleMapper.selectMaps(countWrapper).stream()
+                .collect(Collectors.toMap(
+                        m -> ((Number) m.get("category_id")).longValue(),
+                        m -> ((Number) m.get("cnt")).longValue()
+                ));
+
+        return categories.stream().map(category -> {
+            CategoryVO vo = new CategoryVO();
+            vo.setId(category.getId());
+            vo.setName(category.getName());
+            vo.setCreatedAt(category.getCreatedAt());
+            vo.setUpdatedAt(category.getUpdatedAt());
+            vo.setArticleCount(countByCategoryId.getOrDefault(category.getId(), 0L));
+            return vo;
+        }).toList();
     }
 
     public void createCategory(CategoryCreateDTO dto, Long userId) {

@@ -26,6 +26,7 @@ export interface ArticlePageQuery {
   page: number
   size: number
   keyword?: string
+  categoryId?: number | string
 }
 
 export interface ArticlePage {
