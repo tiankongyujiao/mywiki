@@ -47,8 +47,24 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: frontend
 
-      - name: 安装 Playwright 浏览器
+          # 1. 设置缓存
+      - name: 缓存 Playwright 浏览器
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+  
+      # 2. 如果没命中缓存，下载浏览器和系统依赖
+      - name: 安装 Playwright 浏览器（含依赖）
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: pnpm exec playwright install --with-deps chromium
+        working-directory: frontend
+  
+      # 3. 如果命中了缓存，浏览器已经在了，只需要安装系统依赖（跳过下载）
+      - name: 仅安装 Playwright 系统依赖 (缓存命中时)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
         working-directory: frontend
 
       - name: 跑 e2e（CI 上用无头模式）
