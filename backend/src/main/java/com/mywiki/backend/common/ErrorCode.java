@@ -5,7 +5,7 @@ public enum ErrorCode {
     ARTICLE_NOT_FOUND(10001, "文章不存在", 404),
     PARAM_INVALID(10002, "参数错误", 400),
     USERNAME_EXIST(10003, "用户名已存在", 400),
-    LOGIN_FAILED(10004, "用户名或密码错误", 401),
+    LOGIN_FAILED(10004, "用户名或密码错误", 400),
     SYSTEM_ERROR(50000, "系统异常", 500),
     NO_PERMISSION(10005, "无权操作该文章", 403),
     USER_NOT_FOUND(10006, "用户不存在", 404),
