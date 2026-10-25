@@ -1,0 +1,80 @@
+name: e2e
+
+on:
+  push:          # 每次 push 所有分支都触发
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    env:
+      MYSQL_PWD: '123456'          # reset 脚本 TCP 模式要读它
+    services:
+      mysql:                        # GitHub 帮你起的 MySQL 容器
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: '123456'
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11              # 和你本机一致
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: temurin
+          cache: maven              # 缓存依赖，第二次跑明显变快
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: 安装 mysql 客户端
+        run: sudo apt-get update && sudo apt-get install -y default-mysql-client
+
+      - name: 安装前端依赖
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
+          # 1. 设置缓存
+      - name: 缓存 Playwright 浏览器
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+  
+      # 2. 如果没命中缓存，下载浏览器和系统依赖
+      - name: 安装 Playwright 浏览器（含依赖）
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+        working-directory: frontend
+  
+      # 3. 如果命中了缓存，浏览器已经在了，只需要安装系统依赖（跳过下载）
+      - name: 仅安装 Playwright 系统依赖 (缓存命中时)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+        working-directory: frontend
+
+      - name: 跑 e2e（CI 上用无头模式）
+        run: pnpm exec playwright test
+        working-directory: frontend
+        timeout-minutes: 15
+
+      - name: 失败时上传现场（截图/trace）
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: frontend/test-results/
