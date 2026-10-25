@@ -21,9 +21,9 @@ test('登录后新增文章，列表出现新文章', async ({ page }) => {
   await expect(page).toHaveURL(/\/articles$/)
   await expect(page.locator('.el-message--success')).toContainText('新增成功')
 
-  // 3 篇种子文章 + 新建的 1 篇
+  // 4 篇种子文章 + 新建的 1 篇
   const rows = page.locator('.el-table__row')
-  await expect(rows).toHaveCount(4)
+  await expect(rows).toHaveCount(5)
   await expect(page.getByText('e2e创建的文章')).toBeVisible()
 })
 

@@ -18,7 +18,8 @@ public enum ErrorCode {
     TAG_NAME_EXIST(10013, "标签名称已存在", 400),
     TAG_ADMIN_ONLY(10014, "只有管理员才能管理标签", 403),
     TAG_NOT_FOUND(10015, "标签不存在", 404),
-    TAG_IN_USE(10016, "该标签下还有文章，无法删除", 400);
+    TAG_IN_USE(10016, "该标签下还有文章，无法删除", 400),
+    NEED_LOGIN(10017, "请先登录", 401);
 
 
 

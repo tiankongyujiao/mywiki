@@ -1,13 +1,9 @@
 package com.mywiki.backend;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class BackendApplicationTests {
-
+class BackendApplicationTests extends BaseApiTest {
 	@Test
 	void contextLoads() {
 	}
-
-}
+  }

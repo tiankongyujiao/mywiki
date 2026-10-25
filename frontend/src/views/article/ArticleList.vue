@@ -25,7 +25,7 @@ const fetchCategories = async () => {
 const fetchTags = async () => {
   tags.value = await tagApi.list()
 }
-
+const onlyMine = ref(false)
 const fetchList = async () => {
   loading.value = true
   try {
@@ -35,6 +35,7 @@ const fetchList = async () => {
       keyword: keyword.value.trim() || undefined,
       categoryId: selectedCategoryId.value ?? undefined,
       tagId: selectedTagId.value ?? undefined,
+      mine: onlyMine.value || undefined,
     })
     records.value = data.records
     total.value = Number(data.total) || 0
@@ -134,6 +135,7 @@ onMounted(() => {
             :value="t.id"
           />
         </el-select>
+        <el-checkbox v-model="onlyMine" @change="handleSearch">我的文章</el-checkbox>
       </div>
       <el-button type="primary" :icon="Plus" @click="handleAdd">新增文章</el-button>
     </div>

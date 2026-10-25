@@ -5,10 +5,11 @@ test('文章列表展示种子数据', async ({ page }) => {
   await page.goto('/articles')
 
   const rows = page.locator('.el-table__row')
-  await expect(rows).toHaveCount(3)
+  await expect(rows).toHaveCount(4)
   await expect(page.getByText('种子文章一')).toBeVisible()
   await expect(page.getByText('种子文章二')).toBeVisible()
   await expect(page.getByText('种子文章三')).toBeVisible()
+  await expect(page.getByText('别人的文章')).toBeVisible()
 })
 
 test('按分类筛选：分类A 下只有 2 篇', async ({ page }) => {

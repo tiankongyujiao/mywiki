@@ -30,6 +30,7 @@ export interface ArticlePageQuery {
   keyword?: string
   categoryId?: number | string
   tagId?: number | string
+  mine?: boolean
 }
 
 export interface ArticlePage {

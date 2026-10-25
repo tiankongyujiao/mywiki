@@ -19,6 +19,8 @@ import com.mywiki.backend.common.Result;
 import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletRequest;
 import com.mywiki.backend.annotation.CurrentUser;
+  import com.mywiki.backend.common.ErrorCode;
+  import com.mywiki.backend.exception.BusinessException;
 
 
 
@@ -46,10 +48,15 @@ public class ArticleController {
         @RequestParam(required = false) String keyword,
         @RequestParam(required = false) Long categoryId,
         @RequestParam(required = false) Long tagId,
+        @RequestParam(required = false) Boolean mine,
         HttpServletRequest request
     ) {
+        Long userId = currentUserId(request);
+        if (Boolean.TRUE.equals(mine) && userId == null) {
+            throw new BusinessException(ErrorCode.NEED_LOGIN);
+        }
         return Result.success(
-                articleService.page(page, size, keyword, categoryId, tagId, currentUserId(request))
+                articleService.page(page, size, keyword, categoryId, tagId, userId, Boolean.TRUE.equals(mine))
         );
     }
 

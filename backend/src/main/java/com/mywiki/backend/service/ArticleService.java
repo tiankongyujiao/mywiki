@@ -60,9 +60,12 @@ public class ArticleService {
     //     return articleMapper.selectList(null);
     // }
 
-    public Page<ArticleVO> page(long current, long size, String keyword, Long categoryId, Long tagId, Long currentUserId) {
+    public Page<ArticleVO> page(long current, long size, String keyword, Long categoryId, Long tagId, Long currentUserId, boolean mine) {
         Page<Article> page = new Page<>(current, size);
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
+        if (mine) {
+            wrapper.eq(Article::getUserId, currentUserId);
+        }
         if (keyword != null && !keyword.trim().isEmpty()) {
             String kw = keyword.trim();
             // 用 and(...) 包一层，保证 (标题 like 或 内容 like) 与后续分类条件之间是 AND
