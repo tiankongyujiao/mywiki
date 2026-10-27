@@ -37,7 +37,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Result<?> handleValidation(MethodArgumentNotValidException e){
+    public Result<?> handleValidation(MethodArgumentNotValidException e, HttpServletResponse response){
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         String message =
                 e.getBindingResult()
                 .getFieldErrors()
