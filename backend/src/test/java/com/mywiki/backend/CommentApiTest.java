@@ -63,7 +63,7 @@ class CommentApiTest extends BaseApiTest {
     void 空内容发表被拒绝() throws Exception {
         String token = login("alice");
         // 契约：入参非法属于客户端错误，应 400
-        mockMvc.perform(post(" ")
+        mockMvc.perform(post("/articles/1/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"content\":\"\"}")
                         .header("Authorization", "Bearer " + token))
