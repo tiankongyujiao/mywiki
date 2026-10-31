@@ -26,8 +26,8 @@ class ArticleMineApiTest extends BaseApiTest {
                         .param("mine", "true")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.records.length()").value(2))
+                .andExpect(jsonPath("$.data.records.length()").value(3))
                 .andExpect(jsonPath("$.data.records[*].title",
-                        containsInAnyOrder("alice post 1", "alice post 2")));
+                    containsInAnyOrder("alice post 1", "alice post 2", "alice draft post")));
     }
 }

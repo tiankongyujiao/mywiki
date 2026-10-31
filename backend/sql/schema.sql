@@ -27,6 +27,7 @@ CREATE TABLE `article` (
   `content` text,
   `user_id` bigint DEFAULT NULL,
   `category_id` bigint DEFAULT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'PUBLISHED',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)

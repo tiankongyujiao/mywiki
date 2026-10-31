@@ -15,6 +15,7 @@ export interface Article {
   // 后端按"当前登录用户是否作者"计算后下发，前端直接用
   canEdit?: boolean
   canDelete?: boolean
+  status?: 'DRAFT' | 'PUBLISHED'
 }
 
 export interface ArticlePayload {
@@ -22,6 +23,7 @@ export interface ArticlePayload {
   content: string
   categoryId?: number | string | null
   tags?: string[]
+  status?: 'DRAFT' | 'PUBLISHED'
 }
 
 export interface ArticlePageQuery {

@@ -52,6 +52,12 @@ public class ArticleService {
         }
         vo.setTags(tagService.getTagNamesByArticleIds(List.of(id))
                 .getOrDefault(id, List.of()));
+
+        // 草稿文章仅对作者可见，否则返回 404
+        boolean isOwner = currentUserId != null && currentUserId.equals(article.getUserId());
+        if ("DRAFT".equals(article.getStatus()) && !isOwner) {
+            throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
+        }
         return vo;
     }
 
@@ -65,6 +71,9 @@ public class ArticleService {
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
         if (mine) {
             wrapper.eq(Article::getUserId, currentUserId);
+        } else {
+            // 主列表只展示已发布；「我的文章」看自己的全部（含草稿）
+            wrapper.eq(Article::getStatus, "PUBLISHED");
         }
         if (keyword != null && !keyword.trim().isEmpty()) {
             String kw = keyword.trim();
@@ -142,6 +151,7 @@ public class ArticleService {
         vo.setUpdatedAt(article.getUpdateTime());
         vo.setCanEdit(isOwner);
         vo.setCanDelete(isOwner);
+        vo.setStatus(article.getStatus());
         return vo;
     }
 
@@ -152,6 +162,7 @@ public class ArticleService {
         article.setContent(dto.getContent());
         article.setUserId(userId);
         article.setCategoryId(resolveCategoryId(dto.getCategoryId()));
+        article.setStatus(dto.getStatus());
         articleMapper.insert(article);
         tagService.syncArticleTags(article.getId(), dto.getTags());
     }
@@ -167,6 +178,14 @@ public class ArticleService {
         }
         // 用 UpdateWrapper 显式 set，保证清空分类（categoryId 为 null）也能生效
         LambdaUpdateWrapper<Article> wrapper = new LambdaUpdateWrapper<>();
+
+        // 状态迁移：
+        // 只允许草稿发布；
+        // 已发布文章保持发布（v1 无撤回）
+        if (!"PUBLISHED".equals(article.getStatus()) && "PUBLISHED".equals(dto.getStatus())) {
+            wrapper.set(Article::getStatus, "PUBLISHED");
+        }
+
         wrapper.eq(Article::getId, id)
                 .set(Article::getTitle, dto.getTitle())
                 .set(Article::getContent, dto.getContent())

@@ -8,6 +8,7 @@ import { articlePager } from './pager'
 const route = useRoute()
 const router = useRouter()
 const isEdit = computed(() => route.name === 'ArticleEdit')
+const originalStatus = ref<'DRAFT' | 'PUBLISHED' | null>(null)
 
 const formRef = ref<FormInstance>()
 const loading = ref(false)
@@ -36,11 +37,12 @@ const fetchDetail = async () => {
   form.content = data.content
   form.categoryId = data.categoryId ?? null
   form.tags = data.tags ?? []
+  originalStatus.value = data.status ?? null
 }
 
 const backToList = () => router.push('/articles')
 
-const onSubmit = async () => {
+const onSubmit = async (status: 'DRAFT' | 'PUBLISHED') => {
   if (!formRef.value) return
   await formRef.value.validate()
   loading.value = true
@@ -50,14 +52,19 @@ const onSubmit = async () => {
       content: form.content,
       categoryId: form.categoryId ?? null,
       tags: form.tags ?? [],
+      status,
     }
+    const message =
+      status === 'PUBLISHED'
+        ? (isEdit.value && originalStatus.value === 'PUBLISHED' ? '修改成功' : '发布成功')
+        : '已存草稿'
     if (isEdit.value) {
       await articleApi.update(route.params.id as string, payload)
-      ElMessage.success('修改成功')
+      ElMessage.success(message)
       backToList()
     } else {
       await articleApi.create(payload)
-      ElMessage.success('新增成功')
+      ElMessage.success(message)
       articlePager.page = 1
       backToList()
     }
@@ -134,7 +141,16 @@ onMounted(() => {
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" :loading="loading" @click="onSubmit">保存</el-button>
+        <el-button type="primary" :loading="loading" @click="onSubmit('PUBLISHED')">
+          {{ originalStatus === 'PUBLISHED' ? '保存' : '发布' }}
+        </el-button>
+        <el-button
+          v-if="originalStatus !== 'PUBLISHED'"
+          :loading="loading"
+          @click="onSubmit('DRAFT')"
+        >
+          保存草稿
+        </el-button>
         <el-button @click="backToList">取消</el-button>
       </el-form-item>
     </el-form>

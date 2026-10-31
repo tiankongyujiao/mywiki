@@ -142,7 +142,14 @@ onMounted(() => {
 
     <el-table :data="records" v-loading="loading" border stripe style="width: 100%">
       <el-table-column prop="id" label="ID" width="180" show-overflow-tooltip />
-      <el-table-column prop="title" label="标题" min-width="180" show-overflow-tooltip />
+      <el-table-column prop="title" label="标题" min-width="180" show-overflow-tooltip>
+        <template #default="{ row }">
+          {{ row.title }}
+          <el-tag v-if="row.status === 'DRAFT'" size="small" type="info" style="margin-left: 6px">
+            草稿
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="content" label="内容" min-width="260" show-overflow-tooltip />
       <el-table-column label="分类" width="140" show-overflow-tooltip>
         <template #default="{ row }">{{ row.categoryName || '-' }}</template>

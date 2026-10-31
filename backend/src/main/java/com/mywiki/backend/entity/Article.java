@@ -15,4 +15,5 @@ public class Article {
     private Long categoryId;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
+    private String status;
 }

@@ -15,3 +15,16 @@ INSERT INTO article (id, title, content, user_id, category_id) VALUES
 INSERT INTO comment (id, article_id, user_id, content, created_at, updated_at) VALUES
   (1, 1, 2, 'bob comment on alice', '2026-01-01 12:00:00', '2026-01-01 12:00:00'),
   (2, 3, 1, 'alice comment on bob',   '2026-01-02 12:00:00', '2026-01-02 12:00:00');
+
+
+-- 草稿：alice、bob 各一篇（mine 可见；主列表/他人不可见）
+INSERT INTO article (id, title, content, user_id, category_id, status) VALUES
+  (4, 'alice draft post', 'draft content', 1, NULL, 'DRAFT'),
+  (5, 'bob draft post',   'draft content', 2, NULL, 'DRAFT');
+
+-- 标签计数素材：draftcount 同挂一篇已发布(1)和一篇草稿(4)，只应计 1
+INSERT INTO tag (id, name, created_at, updated_at) VALUES
+  (1, 'draftcount', '2026-01-01 00:00:00', '2026-01-01 00:00:00');
+INSERT INTO article_tag (article_id, tag_id) VALUES
+  (1, 1),
+  (4, 1);

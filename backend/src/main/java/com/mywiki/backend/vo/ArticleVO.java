@@ -31,4 +31,6 @@ public class ArticleVO {
     private Boolean canEdit;
 
     private Boolean canDelete;
+
+    private String status;
 }

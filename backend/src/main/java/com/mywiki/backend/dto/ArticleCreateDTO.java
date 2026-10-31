@@ -24,4 +24,7 @@ public class ArticleCreateDTO {
 
     // 标签名列表，可为空；不存在的标签会自动创建
     private List<String> tags;
+
+    @NotBlank(message = "状态不能为空")
+    private String status;
 }

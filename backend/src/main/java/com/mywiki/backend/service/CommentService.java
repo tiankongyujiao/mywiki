@@ -46,6 +46,11 @@ public class CommentService {
         comment.setArticleId(articleId);
         comment.setUserId(userId);
         comment.setContent(dto.getContent());
+
+        // 草稿对外等于不存在，评论同样拒绝
+        if (!"PUBLISHED".equals(article.getStatus())) {
+            throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
+        }
         commentMapper.insert(comment);
     }
 

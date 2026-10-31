@@ -90,6 +90,7 @@ public class CategoryService {
         QueryWrapper<Article> countWrapper = new QueryWrapper<>();
         countWrapper.select("category_id", "count(*) AS cnt")
                 .isNotNull("category_id")
+                .eq("status", "PUBLISHED")
                 .groupBy("category_id");
         Map<Long, Long> countByCategoryId = articleMapper.selectMaps(countWrapper).stream()
                 .collect(Collectors.toMap(

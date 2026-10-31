@@ -181,6 +181,9 @@ public class TagService {
     private Map<Long, Long> countArticlesByTag() {
         QueryWrapper<ArticleTag> wrapper = new QueryWrapper<>();
         wrapper.select("tag_id", "count(*) AS cnt").groupBy("tag_id");
+        wrapper.select("tag_id", "count(*) AS cnt")
+                  .apply("article_id IN (SELECT id FROM article WHERE status = {0})", "PUBLISHED")
+                  .groupBy("tag_id");
         return articleTagMapper.selectMaps(wrapper).stream()
                 .collect(Collectors.toMap(
                         m -> ((Number) m.get("tag_id")).longValue(),
