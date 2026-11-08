@@ -28,3 +28,22 @@ INSERT INTO tag (id, name, created_at, updated_at) VALUES
 INSERT INTO article_tag (article_id, tag_id) VALUES
   (1, 1),
   (4, 1);
+
+
+-- 管理员：分类/标签管理权限测试用
+INSERT INTO sys_user (id, username, password, role) VALUES
+  (9, 'admin_test', '$2y$10$mgeEUEpvyu3BD3XmSQzBH.ZkTMPHPbCEJ.d.QUH9Xsi7CmUTfV00G', 'ADMIN');
+
+-- 专用分类/标签（不干扰现有 1/2 号数据）：分类 9 下挂一篇草稿，验证"占用"判定
+  INSERT INTO category (id, name, created_at, updated_at) VALUES
+    (8, 'rule-test-cat-2', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+    (9, 'rule-test-cat', '2026-01-01 00:00:00', '2026-01-01 00:00:00');
+
+  INSERT INTO article (id, title, content, user_id, category_id, status) VALUES
+  (9, 'draft in rule-test-cat', 'c', 9, 9, 'DRAFT');
+
+  INSERT INTO tag (id, name, created_at, updated_at) VALUES
+  (9, 'rule-test-tag', '2026-01-01 00:00:00', '2026-01-01 00:00:00');
+
+  INSERT INTO article_tag (article_id, tag_id) VALUES
+  (9, 9);
