@@ -12,7 +12,10 @@ import com.mywiki.backend.mapper.CommentMapper;
 import com.mywiki.backend.mapper.UserMapper;
 import com.mywiki.backend.vo.CommentVO;
 import org.springframework.stereotype.Service;
-
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.Objects;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,28 +57,48 @@ public class CommentService {
         commentMapper.insert(comment);
     }
 
-    // 查询文章评论：先查评论，再循环查用户名（N+1 Query，后续课程优化）
-    public List<CommentVO> listByArticleId(Long articleId) {
-        List<Comment> comments = commentMapper.selectList(
+    // 分页查询文章评论（createdAt 倒序，最新在前）
+    public Page<CommentVO> pageComments(long current, long size, Long articleId) {
+        Page<Comment> page = commentMapper.selectPage(
+                new Page<>(current, size),
                 new LambdaQueryWrapper<Comment>()
                         .eq(Comment::getArticleId, articleId)
                         .orderByDesc(Comment::getCreatedAt)
         );
 
+        Page<CommentVO> voPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
+
+        // 1. 批量查询用户信息
+        Map<Long, String> userMap = loadUserNames(page.getRecords());
+
         List<CommentVO> result = new ArrayList<>();
-        for (Comment comment : comments) {
-            User user = userMapper.selectById(comment.getUserId());
+        for (Comment comment : page.getRecords()) {
+            String username = userMap.get(comment.getUserId());
 
             CommentVO vo = new CommentVO();
             vo.setId(comment.getId());
             vo.setArticleId(comment.getArticleId());
             vo.setUserId(comment.getUserId());
-            vo.setUsername(user == null ? null : user.getUsername());
+            vo.setUsername(username);
             vo.setContent(comment.getContent());
             vo.setCreatedAt(comment.getCreatedAt());
             result.add(vo);
         }
-        return result;
+        voPage.setRecords(result);
+        return voPage;
+    }
+
+    private Map<Long, String> loadUserNames(List<Comment> comments) {
+        List<Long> userIds = comments.stream()
+                .map(Comment::getUserId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        if (userIds.isEmpty()) {
+            return Map.of();
+        }
+        return userMapper.selectBatchIds(userIds).stream()
+                .collect(Collectors.toMap(User::getId, User::getUsername));
     }
 
     public void deleteComment(Long articleId, Long commentId, Long userId) {

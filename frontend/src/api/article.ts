@@ -51,7 +51,10 @@ export interface Comment {
   content: string
   createdAt?: unknown
 }
-
+export interface CommentPage {
+  records: Comment[]
+  total: string | number
+}
 export const articleApi = {
   list: (params: ArticlePageQuery) =>
     request.get<unknown, ArticlePage>('/articles', { params }),
@@ -64,8 +67,8 @@ export const articleApi = {
   remove: (id: number | string) =>
     request.delete<unknown, void>(`/articles/${id}`),
   // 查询文章评论（公开）
-  listComments: (articleId: number | string) =>
-    request.get<unknown, Comment[]>(`/articles/${articleId}/comments`),
+  listComments: (articleId: number | string, params: { page: number; size: number }) =>
+    request.get<unknown, CommentPage>(`/articles/${articleId}/comments`, { params }),
   // 发表评论（需登录，token 由 request 拦截器自动带上）
   createComment: (articleId: number | string, data: { content: string }) =>
     request.post<unknown, void>(`/articles/${articleId}/comments`, data),

@@ -16,9 +16,9 @@ class CommentApiTest extends BaseApiTest {
     void 评论列表公开可读() throws Exception {
         mockMvc.perform(get("/articles/1/comments"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.length()").value(1))
-                .andExpect(jsonPath("$.data[0].content").value("bob comment on alice"))
-                .andExpect(jsonPath("$.data[0].username").value("bob"));
+                .andExpect(jsonPath("$.data.records.length()").value(1))
+                .andExpect(jsonPath("$.data.records[0].content").value("bob comment on alice"))
+                .andExpect(jsonPath("$.data.records[0].username").value("bob"));
     }
 
     @Test
@@ -42,10 +42,10 @@ class CommentApiTest extends BaseApiTest {
                 .andExpect(jsonPath("$.code").value(0));
 
         mockMvc.perform(get("/articles/1/comments"))
-                .andExpect(jsonPath("$.data.length()").value(2))
-                .andExpect(jsonPath("$.data[0].content").value("alice new comment"))
-                .andExpect(jsonPath("$.data[0].username").value("alice"))
-                .andExpect(jsonPath("$.data[1].content").value("bob comment on alice"));
+                .andExpect(jsonPath("$.data.records.length()").value(2))
+                .andExpect(jsonPath("$.data.records[0].content").value("alice new comment"))
+                .andExpect(jsonPath("$.data.records[0].username").value("alice"))
+                .andExpect(jsonPath("$.data.records[1].content").value("bob comment on alice"));
     }
 
     @Test
@@ -79,7 +79,7 @@ class CommentApiTest extends BaseApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(0));
         mockMvc.perform(get("/articles/1/comments"))
-                .andExpect(jsonPath("$.data.length()").value(0));
+                .andExpect(jsonPath("$.data.records.length()").value(0));
     }
 
     @Test

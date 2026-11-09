@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -26,10 +28,14 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    // 查询文章评论（公开，无需登录）
+    // 查询文章评论（公开，无需登录），分页
     @GetMapping("/{articleId}/comments")
-    public Result<List<CommentVO>> list(@PathVariable Long articleId) {
-        return Result.success(commentService.listByArticleId(articleId));
+    public Result<Page<CommentVO>> list(
+            @PathVariable Long articleId,
+            @RequestParam(defaultValue = "1") long page,
+            @RequestParam(defaultValue = "10") long size
+    ) {
+        return Result.success(commentService.pageComments(page, size, articleId));
     }
 
     // 发表评论（需登录，userId 由 @CurrentUser 从 JWT 解析）

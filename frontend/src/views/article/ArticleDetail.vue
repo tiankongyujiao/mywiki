@@ -13,11 +13,20 @@ const article = ref<Article>()
 
 // 评论
 const comments = ref<Comment[]>([])
+const commentPage = ref(1)
+const commentTotal = ref(0)
 const commentContent = ref('')
 const submitting = ref(false)
+const COMMENT_SIZE = 10
 
-const fetchComments = async () => {
-  comments.value = await articleApi.listComments(route.params.id as string)
+const fetchComments = async (page = 1) => {
+  commentPage.value = page
+  const data = await articleApi.listComments(route.params.id as string, {
+    page,
+    size: COMMENT_SIZE,
+  })
+  comments.value = data.records
+  commentTotal.value = Number(data.total) || 0
 }
 
 const submitComment = async () => {
@@ -30,9 +39,9 @@ const submitComment = async () => {
     await articleApi.createComment(route.params.id as string, {
       content: commentContent.value,
     })
-    commentContent.value = ''
     ElMessage.success('评论成功')
-    await fetchComments()
+    commentContent.value = ''
+    await fetchComments(1)
   } finally {
     submitting.value = false
   }
@@ -192,6 +201,14 @@ onMounted(() => {
         <div class="comment-content">{{ c.content }}</div>
       </div>
     </div>
+    <el-pagination
+      v-if="commentTotal > COMMENT_SIZE"
+      v-model:current-page="commentPage"
+      :page-size="COMMENT_SIZE"
+      :total="commentTotal"
+      layout="total, prev, pager, next"
+      @current-change="fetchComments"
+    />
   </el-card>
 </template>
 

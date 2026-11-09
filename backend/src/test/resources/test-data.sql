@@ -47,3 +47,18 @@ INSERT INTO sys_user (id, username, password, role) VALUES
 
   INSERT INTO article_tag (article_id, tag_id) VALUES
   (9, 9);
+
+
+  -- 评论分页素材：文章 3 共 12 条（已有 alice 1 条 + 这里 11 条），时间递增
+  INSERT INTO comment (id, article_id, user_id, content, created_at, updated_at) VALUES
+    (10, 3, 2, 'page test comment 02', '2026-01-10 10:00:00', '2026-01-10 10:00:00'),
+    (11, 3, 2, 'page test comment 03', '2026-01-11 10:00:00', '2026-01-11 10:00:00'),
+    (12, 3, 2, 'page test comment 04', '2026-01-12 10:00:00', '2026-01-12 10:00:00'),
+    (13, 3, 2, 'page test comment 05', '2026-01-13 10:00:00', '2026-01-13 10:00:00'),
+    (14, 3, 2, 'page test comment 06', '2026-01-14 10:00:00', '2026-01-14 10:00:00'),
+    (15, 3, 2, 'page test comment 07', '2026-01-15 10:00:00', '2026-01-15 10:00:00'),
+    (16, 3, 2, 'page test comment 08', '2026-01-16 10:00:00', '2026-01-16 10:00:00'),
+    (17, 3, 2, 'page test comment 09', '2026-01-17 10:00:00', '2026-01-17 10:00:00'),
+    (18, 3, 2, 'page test comment 10', '2026-01-18 10:00:00', '2026-01-18 10:00:00'),
+    (19, 3, 2, 'page test comment 11', '2026-01-19 10:00:00', '2026-01-19 10:00:00'),
+    (20, 3, 2, 'page test comment 12', '2026-01-20 10:00:00', '2026-01-20 10:00:00');
