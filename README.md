@@ -10,6 +10,7 @@
 |---|---|
 | 前端 | Vue 3.5 · Element Plus 2.14 · Pinia · Vue Router · Vite 8 · TypeScript · axios |
 | 后端 | Spring Boot 3.5 · MyBatis-Plus 3.5 · JWT (jjwt) · BCrypt · Bean Validation（Java 17） |
+| 接口文档 | OpenAPI 3（springdoc 2.10）+ Swagger UI（自动扫描 Controller 生成，零漂移） |
 | 数据库 | MySQL 8（utf8mb4） |
 | 测试 | JUnit 5 + Spring Boot Test + MockMvc + Testcontainers（后端）· Playwright（e2e） |
 | 工程 | GitHub Actions（push 触发，e2e / backend-test 双 job 并行） |
@@ -75,6 +76,8 @@ cd frontend && pnpm install && pnpm dev
 ```
 
 访问 http://localhost:5173 ，注册账号即可使用。
+
+接口文档：后端启动后打开 http://localhost:8080/swagger-ui.html —— 自动扫描 Controller 生成的 OpenAPI 文档，右上角 **Authorize** 填入登录接口返回的 token 后可直接调试受保护接口。
 
 ## 测试
 
