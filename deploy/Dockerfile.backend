@@ -1,0 +1,8 @@
+# 后端镜像：拷贝本机构建好的 jar，服务器上不需要 Maven
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY backend/target/backend-0.0.1-SNAPSHOT.jar app.jar
+# 2G 内存机器：JVM 限 384m，给 MySQL 和 nginx 留余量
+ENV JAVA_OPTS="-Xmx384m -Xms128m"
+EXPOSE 8080
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

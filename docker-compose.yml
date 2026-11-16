@@ -1,0 +1,55 @@
+# 一键拉起整套：mysql + backend + frontend(nginx)
+# 用法：docker compose up -d
+name: mywiki
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mywiki-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mywiki_prod_2026
+      MYSQL_DATABASE: mywiki
+      TZ: Asia/Shanghai
+    # 不映射宿主机端口：数据库只在 docker 内网可达，最小暴露面
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # 首次启动自动建表：只挂 schema.sql 单文件——
+      # 挂整个目录会把 reset-test-db.sh 也当初始化脚本执行
+      - ./backend/sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_0900_ai_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pmywiki_prod_2026"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.backend
+    container_name: mywiki-backend
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mywiki?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: mywiki_prod_2026
+      TZ: Asia/Shanghai
+    # 不映射 8080：由 nginx 内网反代
+
+  frontend:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.frontend
+    container_name: mywiki-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"   # 唯一暴露的入口
+
+volumes:
+  mysql-data:

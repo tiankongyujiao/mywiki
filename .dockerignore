@@ -1,0 +1,9 @@
+.git
+.DS_Store
+*.png
+frontend/node_modules
+frontend/dist
+frontend/test-results
+frontend/playwright-report
+backend/src
+backend/sql
