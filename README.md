@@ -2,6 +2,8 @@
 
 # MyWiki —— 个人 Wiki / 博客系统
 
+**在线演示：http://47.117.92.149**（Docker Compose 部署，nginx + Spring Boot + MySQL 容器化）
+
 全栈个人博客：文章（含草稿/发布）、分类、标签、评论、JWT 登录。后端 TDD 开发，接口测试与 e2e 测试覆盖核心业务规则，CI 双 job 自动回归。
 
 ## 技术栈
@@ -99,6 +101,23 @@ cd frontend && pnpm exec playwright test
 
 - `e2e`：MySQL service 容器 + 安装客户端 → Playwright 全量 e2e
 - `backend-test`：Testcontainers 自起 MySQL → `./mvnw test`
+
+## 部署
+
+线上环境：轻量云服务器（2C2G，Ubuntu 24.04，宿主机仅安装 Docker）。三个容器由 `docker-compose.yml` 一键编排：
+
+```bash
+# 本地构建 jar 并上传（服务器不跑 Maven，省内存）
+cd backend && ./mvnw package -DskipTests
+scp backend/target/backend-0.0.1-SNAPSHOT.jar root@<server>:/root/mywiki/backend/target/
+
+# 服务器上：拉起全套（nginx + backend + mysql）
+cd mywiki && docker compose up -d --build
+```
+
+- 公网仅暴露 80（nginx 入口）；后端 8080 与 MySQL 3306 只在 Docker 内网可达（最小暴露面）
+- 前端产物在镜像构建期由 Node 容器生成，最终镜像只含 nginx + 静态文件
+- 首次启动由 `backend/sql/schema.sql` 自动建表（MySQL 容器 `/docker-entrypoint-initdb.d` 机制）
 
 ## 约定
 
